@@ -120,10 +120,39 @@
         <div id="tab-chatbot" class="tab-content">
             <h2>🤖 Asistente AQUIFY</h2>
 
-            <div class="tabs" style="margin-bottom: 1rem;">
-                <button class="btn btn-secondary" onclick="mostrarRutina()">Ver Mi Rutina</button>
-                <button class="btn btn-secondary" onclick="mostrarConsejos()">Consejos</button>
-                <button class="btn btn-secondary" onclick="mostrarRecomendaciones()">Recomendaciones Musicales</button>
+            <div class="card">
+                <h3>💬 Chat Interactivo</h3>
+                <div id="chat-container" class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-message bot-message">
+                            <strong>AQUIFY:</strong>
+                            <p>¡Hola! 👋 Soy tu asistente personal. Puedo ayudarte con:</p>
+                            <ul>
+                                <li>🧴 Rutinas de cuidado de la piel</li>
+                                <li>⭐ Rutinas de famosos y celebridades</li>
+                                <li>💄 Recomendaciones de productos</li>
+                                <li>🎵 Sugerencias de música para tu ducha</li>
+                                <li>📚 Información de fuentes confiables sobre cuidado de la piel</li>
+                            </ul>
+                            <p>¿En qué puedo ayudarte?</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Escribe tu pregunta aquí..."
+                            onkeypress="if(event.key==='Enter') enviarMensaje()">
+                        <button class="btn btn-primary" onclick="enviarMensaje()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+                <h3>📋 Acciones Rápidas</h3>
+                <div class="tabs">
+                    <button class="btn btn-secondary" onclick="mostrarRutina()">Ver Mi Rutina</button>
+                    <button class="btn btn-secondary" onclick="mostrarConsejos()">Consejos</button>
+                    <button class="btn btn-secondary" onclick="mostrarRecomendaciones()">Recomendaciones
+                        Musicales</button>
+                </div>
             </div>
 
             <div id="chatbot-response"></div>

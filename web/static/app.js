@@ -321,6 +321,79 @@ async function eliminarCancion(id) {
 
 // ============ CHATBOT ============
 
+// Variables del chat
+let chatHistory = [];
+
+async function enviarMensaje() {
+    const input = document.getElementById('chat-input');
+    const mensaje = input.value.trim();
+
+    if (!mensaje) return;
+
+    // Agregar mensaje del usuario al chat
+    agregarMensajeAlChat('user', mensaje);
+    input.value = '';
+
+    // Mostrar indicador de escritura
+    const chatMessages = document.getElementById('chat-messages');
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'chat-message bot-message typing-indicator';
+    typingIndicator.innerHTML = '<strong>AQUIFY:</strong><p>Escribiendo...</p>';
+    typingIndicator.id = 'typing-indicator';
+    chatMessages.appendChild(typingIndicator);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+        const response = await fetch('/api/chatbot/mensaje', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ mensaje })
+        });
+
+        const data = await response.json();
+
+        // Eliminar indicador de escritura
+        document.getElementById('typing-indicator')?.remove();
+
+        if (data.success) {
+            agregarMensajeAlChat('bot', data.respuesta);
+        } else {
+            agregarMensajeAlChat('bot', 'Lo siento, hubo un error al procesar tu mensaje. 😅');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('typing-indicator')?.remove();
+        agregarMensajeAlChat('bot', 'Error de conexión. Por favor, intenta de nuevo.');
+    }
+}
+
+function agregarMensajeAlChat(tipo, mensaje) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${tipo}-message`;
+
+    if (tipo === 'user') {
+        messageDiv.innerHTML = `<p>${mensaje}</p>`;
+    } else {
+        // Convertir markdown básico y saltos de línea
+        let formattedMessage = mensaje
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+
+        messageDiv.innerHTML = `<strong>AQUIFY:</strong><p>${formattedMessage}</p>`;
+    }
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Guardar en historial
+    chatHistory.push({ tipo, mensaje, timestamp: new Date() });
+}
+
 async function mostrarRutina() {
     try {
         const response = await fetch('/api/chatbot/rutina', {

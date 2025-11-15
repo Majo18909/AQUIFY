@@ -12,6 +12,9 @@ import json
 from datetime import datetime
 from pathlib import Path
 import secrets
+import re
+import requests
+from urllib.parse import quote_plus
 
 app = Flask(__name__, 
             template_folder='web/templates',
@@ -324,6 +327,402 @@ def obtener_recomendaciones_musica():
     ]
     
     return jsonify({'success': True, 'recomendaciones': recomendaciones})
+
+# ============ API - CHATBOT INTERACTIVO ============
+
+# Base de conocimiento del chatbot
+CONOCIMIENTO_BASE = {
+    'saludos': {
+        'patrones': ['hola', 'buenos días', 'buenas tardes', 'buenas noches', 'hey', 'saludos', 'qué tal', 'cómo estás'],
+        'respuestas': [
+            '¡Hola! 👋 Soy el asistente de AQUIFY. ¿En qué puedo ayudarte hoy?',
+            '¡Hola! 💧 ¿Necesitas ayuda con tu rutina de ducha o productos para el cuidado de la piel?',
+            '¡Buenos días! 🎵 Estoy aquí para ayudarte con rutinas, productos y música para tu ducha.'
+        ]
+    },
+    'funciones': {
+        'patrones': ['qué puedes hacer', 'funciones', 'ayuda', 'cómo funciona', 'para qué sirves', 'características'],
+        'respuesta': '''¡Puedo ayudarte con muchas cosas! 🌟
+
+📋 **Funcionalidades de AQUIFY:**
+• Ver tu rutina de ducha personalizada según tu tipo de piel
+• Obtener consejos de cuidado de la piel
+• Recomendarte productos adecuados para tu perfil
+• Sugerirte rutinas de famosos y celebridades
+• Ayudarte a editar y personalizar tu rutina
+• Recomendar música perfecta para tu ducha
+• Buscar canciones de artistas específicos para tu rutina
+• Responder preguntas sobre cuidado de la piel basadas en fuentes confiables
+
+¿Qué te gustaría hacer?'''
+    },
+    'despedida': {
+        'patrones': ['adiós', 'chao', 'hasta luego', 'bye', 'nos vemos', 'gracias'],
+        'respuestas': [
+            '¡Hasta luego! 👋 ¡Que disfrutes tu ducha! 💧',
+            '¡Adiós! 🎵 Vuelve cuando necesites ayuda con tu rutina.',
+            '¡Nos vemos! ✨ ¡Cuida tu piel!'
+        ]
+    }
+}
+
+# Rutinas de famosos/celebridades
+RUTINAS_FAMOSOS = {
+    'miranda kerr': {
+        'nombre': 'Miranda Kerr',
+        'rutina': [
+            'Agua tibia para abrir los poros',
+            'Limpiador suave con aceite de rosa mosqueta',
+            'Exfoliación ligera 2 veces por semana',
+            'Masaje facial con aceite de coco',
+            'Enjuague con agua fría para cerrar poros'
+        ],
+        'productos': ['Aceite de rosa mosqueta', 'Aceite de coco orgánico', 'Limpiador natural'],
+        'tiempo': 10
+    },
+    'hailey bieber': {
+        'nombre': 'Hailey Bieber',
+        'rutina': [
+            'Doble limpieza (aceite + gel)',
+            'Agua tibia constante',
+            'Sérum de ácido hialurónico en piel húmeda',
+            'Hidratación intensiva',
+            'Protector solar si es de día'
+        ],
+        'productos': ['Limpiador con aceite', 'Gel limpiador', 'Ácido hialurónico', 'Crema hidratante'],
+        'tiempo': 8
+    },
+    'jennie kim': {
+        'nombre': 'Jennie Kim (BLACKPINK)',
+        'rutina': [
+            'Limpieza con espuma suave',
+            'Tónico hidratante',
+            'Esencia facial',
+            'Crema hidratante ligera',
+            'Mascarilla de hidrogel 2 veces por semana'
+        ],
+        'productos': ['Limpiador de espuma', 'Tónico coreano', 'Esencia', 'Crema gel'],
+        'tiempo': 12
+    },
+    'zendaya': {
+        'nombre': 'Zendaya',
+        'rutina': [
+            'Limpieza suave sin sulfatos',
+            'Exfoliación química semanal',
+            'Hidratación profunda',
+            'Aceites naturales para el cuerpo',
+            'Agua fría al final'
+        ],
+        'productos': ['Limpiador sin sulfatos', 'Exfoliante AHA/BHA', 'Manteca de karité', 'Aceite de jojoba'],
+        'tiempo': 9
+    }
+}
+
+# Productos recomendados por tipo de piel
+PRODUCTOS_RECOMENDADOS = {
+    'Normal': {
+        'limpiadores': ['CeraVe Hydrating Cleanser', 'Neutrogena Hydro Boost', 'La Roche-Posay Toleriane'],
+        'hidratantes': ['Cetaphil Daily Hydrating Lotion', 'Eucerin Original Healing Cream', 'Aveeno Daily Moisturizing'],
+        'especiales': ['The Ordinary Niacinamide', 'Paula\'s Choice BHA']
+    },
+    'Seca': {
+        'limpiadores': ['CeraVe Cream-to-Foam Cleanser', 'Dove Beauty Bar', 'Eucerin Advanced Cleansing Body'],
+        'hidratantes': ['La Roche-Posay Lipikar Balm', 'Eucerin Advanced Repair', 'Aveeno Eczema Therapy'],
+        'especiales': ['Aceite de jojoba', 'Manteca de karité', 'Ácido hialurónico']
+    },
+    'Grasa': {
+        'limpiadores': ['CeraVe Foaming Facial Cleanser', 'Neutrogena Oil-Free Acne Wash', 'La Roche-Posay Effaclar'],
+        'hidratantes': ['Neutrogena Hydro Boost Water Gel', 'CeraVe PM Facial Moisturizing Lotion', 'La Roche-Posay Effaclar Mat'],
+        'especiales': ['Ácido salicílico', 'Niacinamida', 'Té verde']
+    },
+    'Mixta': {
+        'limpiadores': ['CeraVe Foaming Facial Cleanser', 'Neutrogena Deep Clean', 'Bioderma Sensibio'],
+        'hidratantes': ['Neutrogena Hydro Boost Gel', 'The Ordinary Natural Moisturizing Factors', 'Clinique Dramatically Different Gel'],
+        'especiales': ['Niacinamida', 'Ácido hialurónico', 'Té verde']
+    },
+    'Sensible': {
+        'limpiadores': ['La Roche-Posay Toleriane', 'CeraVe Hydrating Cleanser', 'Vanicream Gentle Cleanser'],
+        'hidratantes': ['CeraVe Moisturizing Cream', 'La Roche-Posay Cicaplast Baume', 'Eucerin Sensitive Skin'],
+        'especiales': ['Centella asiática', 'Avena coloidal', 'Aloe vera']
+    }
+}
+
+# Géneros musicales por tipo de rutina
+MUSICA_POR_RUTINA = {
+    'relajante': ['Lo-fi', 'Ambient', 'Jazz suave', 'Bossa nova', 'Música clásica'],
+    'energizante': ['Pop', 'Indie pop', 'Electrónica chill', 'R&B moderno'],
+    'rapida': ['Indie rock', 'Pop rock', 'Electrónica upbeat'],
+    'larga': ['Playlists ambient', 'Música instrumental', 'Soundtracks']
+}
+
+def clasificar_intencion(mensaje):
+    """Clasifica la intención del usuario"""
+    mensaje = mensaje.lower().strip()
+    
+    # Saludos
+    if any(patron in mensaje for patron in CONOCIMIENTO_BASE['saludos']['patrones']):
+        return 'saludo'
+    
+    # Despedidas
+    if any(patron in mensaje for patron in CONOCIMIENTO_BASE['despedida']['patrones']):
+        return 'despedida'
+    
+    # Funciones de la app
+    if any(patron in mensaje for patron in CONOCIMIENTO_BASE['funciones']['patrones']):
+        return 'funciones'
+    
+    # Rutinas de famosos
+    if any(palabra in mensaje for palabra in ['famoso', 'celebridad', 'celebrity', 'estrella', 'artista famoso']):
+        return 'rutina_famoso'
+    
+    # Rutina personalizada
+    if any(palabra in mensaje for palabra in ['mi rutina', 'rutina', 'pasos', 'qué debo hacer']):
+        return 'rutina'
+    
+    # Editar rutina
+    if any(palabra in mensaje for palabra in ['editar', 'modificar', 'cambiar', 'personalizar']) and 'rutina' in mensaje:
+        return 'editar_rutina'
+    
+    # Productos
+    if any(palabra in mensaje for palabra in ['producto', 'crema', 'limpiador', 'hidratante', 'recomienda', 'recomendación']):
+        return 'productos'
+    
+    # Música
+    if any(palabra in mensaje for palabra in ['música', 'canción', 'canciones', 'playlist', 'artista', 'cantante']):
+        return 'musica'
+    
+    # Búsqueda general (temas de piel y cuidado)
+    if any(palabra in mensaje for palabra in ['piel', 'cuidado', 'acné', 'arrugas', 'manchas', 'dermatitis', 'eczema', 'psoriasis', 'rosácea']):
+        return 'busqueda_salud'
+    
+    return 'desconocido'
+
+def extraer_nombre_famoso(mensaje):
+    """Extrae el nombre del famoso del mensaje"""
+    mensaje = mensaje.lower()
+    for nombre in RUTINAS_FAMOSOS.keys():
+        if nombre in mensaje:
+            return nombre
+    return None
+
+def extraer_artista(mensaje):
+    """Extrae el nombre del artista del mensaje"""
+    # Patrones comunes
+    patrones = [
+        r'canciones de (.+)',
+        r'música de (.+)',
+        r'artista (.+)',
+        r'cantante (.+)',
+        r'de (.+)',
+    ]
+    
+    for patron in patrones:
+        match = re.search(patron, mensaje.lower())
+        if match:
+            return match.group(1).strip()
+    return None
+
+def buscar_en_google(query):
+    """Busca información en Google (simulado - solo devuelve fuentes confiables)"""
+    # Fuentes confiables autorizadas
+    fuentes_confiables = [
+        'mayoclinic.org',
+        'aad.org',  # American Academy of Dermatology
+        'who.int',  # World Health Organization
+        'nih.gov',  # National Institutes of Health
+        'healthline.com',
+        'webmd.com',
+        'medlineplus.gov',
+        'cdc.gov'
+    ]
+    
+    # Nota: En producción, usarías una API real de búsqueda
+    # Por ahora, devolvemos información educativa general
+    respuesta = f'''He encontrado información sobre "{query}" de fuentes confiables:
+
+📚 **Recomendaciones generales:**
+• Consulta siempre con un dermatólogo para problemas específicos
+• Usa productos adecuados para tu tipo de piel
+• Mantén una rutina consistente de limpieza e hidratación
+• Protege tu piel del sol diariamente
+
+🔍 **Fuentes confiables recomendadas:**
+• American Academy of Dermatology (aad.org)
+• Mayo Clinic (mayoclinic.org)
+• National Institutes of Health (nih.gov)
+
+Para información más específica sobre tu consulta, te recomiendo visitar estos sitios oficiales.'''
+    
+    return respuesta
+
+@app.route('/api/chatbot/mensaje', methods=['POST'])
+def procesar_mensaje_chatbot():
+    """Procesa mensajes del chatbot interactivo"""
+    data = request.json
+    mensaje = data.get('mensaje', '').strip()
+    
+    if not mensaje:
+        return jsonify({'success': False, 'message': 'Mensaje vacío'})
+    
+    # Obtener perfil del usuario
+    usuario_file = get_user_file('usuario.json')
+    usuario = cargar_json(usuario_file, None)
+    
+    # Clasificar intención
+    intencion = clasificar_intencion(mensaje)
+    
+    respuesta = ''
+    datos_extra = {}
+    
+    if intencion == 'saludo':
+        import random
+        respuesta = random.choice(CONOCIMIENTO_BASE['saludos']['respuestas'])
+    
+    elif intencion == 'despedida':
+        import random
+        respuesta = random.choice(CONOCIMIENTO_BASE['despedida']['respuestas'])
+    
+    elif intencion == 'funciones':
+        respuesta = CONOCIMIENTO_BASE['funciones']['respuesta']
+    
+    elif intencion == 'rutina':
+        if not usuario:
+            respuesta = 'Primero necesitas crear tu perfil en la pestaña "Perfil" para que pueda darte una rutina personalizada. 😊'
+        else:
+            tipo_piel = usuario.get('tipo_piel', 'Normal')
+            rutina_info = RUTINAS_PIEL.get(tipo_piel, RUTINAS_PIEL['Normal'])
+            
+            respuesta = f'''Tu rutina personalizada para piel **{tipo_piel}**: 💧
+
+**Pasos:**
+'''
+            for i, paso in enumerate(rutina_info['rutina'], 1):
+                respuesta += f'{i}. {paso}\n'
+            
+            respuesta += f'\n⏱️ **Tiempo total:** {rutina_info["tiempo_total"]} minutos\n\n'
+            respuesta += '**💡 Consejos:**\n'
+            for consejo in rutina_info['consejos']:
+                respuesta += f'• {consejo}\n'
+            
+            datos_extra['rutina'] = rutina_info
+    
+    elif intencion == 'rutina_famoso':
+        nombre_famoso = extraer_nombre_famoso(mensaje)
+        
+        if nombre_famoso:
+            rutina = RUTINAS_FAMOSOS[nombre_famoso]
+            respuesta = f'''**Rutina de {rutina["nombre"]}:** ✨\n\n'''
+            for i, paso in enumerate(rutina['rutina'], 1):
+                respuesta += f'{i}. {paso}\n'
+            
+            respuesta += f'\n⏱️ **Tiempo:** {rutina["tiempo"]} minutos\n\n'
+            respuesta += '**Productos que usa:**\n'
+            for prod in rutina['productos']:
+                respuesta += f'• {prod}\n'
+            
+            datos_extra['rutina_famoso'] = rutina
+        else:
+            respuesta = '''**Rutinas de celebridades disponibles:** 🌟
+
+• **Miranda Kerr** - Enfoque en aceites naturales
+• **Hailey Bieber** - Doble limpieza y hidratación
+• **Jennie Kim** - Rutina coreana de 10 pasos
+• **Zendaya** - Productos naturales y agua fría
+
+Pregúntame por alguna en específico, por ejemplo: "¿Cuál es la rutina de Hailey Bieber?"'''
+    
+    elif intencion == 'editar_rutina':
+        respuesta = '''Para editar tu rutina puedo ayudarte con: 🛠️
+
+1. **Reducir tiempo:** Rutina rápida de 5 minutos
+2. **Aumentar tiempo:** Rutina spa de 15+ minutos  
+3. **Agregar pasos:** Exfoliación, mascarillas, etc.
+4. **Cambiar productos:** Según tu presupuesto o preferencias
+
+¿Qué te gustaría modificar?'''
+    
+    elif intencion == 'productos':
+        if not usuario:
+            tipo_piel = 'Normal'
+            respuesta = 'Te doy recomendaciones generales. Para productos personalizados, crea tu perfil primero. 😊\n\n'
+        else:
+            tipo_piel = usuario.get('tipo_piel', 'Normal')
+            respuesta = f'**Productos recomendados para piel {tipo_piel}:** 🧴\n\n'
+        
+        productos = PRODUCTOS_RECOMENDADOS.get(tipo_piel, PRODUCTOS_RECOMENDADOS['Normal'])
+        
+        respuesta += '**Limpiadores:**\n'
+        for prod in productos['limpiadores']:
+            respuesta += f'• {prod}\n'
+        
+        respuesta += '\n**Hidratantes:**\n'
+        for prod in productos['hidratantes']:
+            respuesta += f'• {prod}\n'
+        
+        respuesta += '\n**Ingredientes especiales:**\n'
+        for prod in productos['especiales']:
+            respuesta += f'• {prod}\n'
+        
+        respuesta += '\n💡 **Tip:** Estos productos están respaldados por dermatólogos y son de marcas confiables.'
+        
+        datos_extra['productos'] = productos
+    
+    elif intencion == 'musica':
+        artista = extraer_artista(mensaje)
+        
+        if artista:
+            respuesta = f'''🎵 **Canciones de {artista.title()} perfectas para tu ducha:**
+
+Para encontrar canciones específicas de este artista, puedes:
+1. Ir a la pestaña "Música"
+2. Subir tus canciones favoritas de {artista.title()}
+3. Crear tu playlist personalizada
+
+💡 **Tip:** Las canciones relajantes y a tempo medio (60-90 BPM) son ideales para ducharte.'''
+        else:
+            respuesta = '''🎵 **Recomendaciones de música para tu ducha:**
+
+**Por tipo de rutina:**
+• **Relajante:** Lo-fi, Ambient, Jazz suave
+• **Energizante:** Pop, Indie pop, R&B moderno
+• **Rápida:** Indie rock, Pop rock
+• **Larga/Spa:** Playlists ambient, Instrumental
+
+**Artistas recomendados:**
+• Billie Eilish (canciones suaves)
+• Rex Orange County
+• Conan Gray
+• Clairo
+• Keshi
+• JVKE
+
+¿Buscas canciones de algún artista en particular?'''
+        
+        datos_extra['musica'] = MUSICA_POR_RUTINA
+    
+    elif intencion == 'busqueda_salud':
+        # Buscar información de fuentes confiables
+        respuesta = buscar_en_google(mensaje)
+        datos_extra['fuentes_confiables'] = True
+    
+    else:
+        respuesta = '''No estoy seguro de cómo ayudarte con eso. 🤔
+
+Puedo ayudarte con:
+• Tu rutina de ducha personalizada
+• Rutinas de famosos
+• Recomendaciones de productos
+• Sugerencias de música
+• Información sobre cuidado de la piel
+
+¿Qué te gustaría saber?'''
+    
+    return jsonify({
+        'success': True,
+        'respuesta': respuesta,
+        'intencion': intencion,
+        'datos_extra': datos_extra
+    })
 
 # ============ EJECUTAR SERVIDOR ============
 
