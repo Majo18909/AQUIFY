@@ -366,10 +366,12 @@ CONOCIMIENTO_BASE = {
     }
 }
 
-# Rutinas de famosos/celebridades
+# Rutinas de famosos/celebridades (basadas en rutinas reales compartidas públicamente)
 RUTINAS_FAMOSOS = {
     'miranda kerr': {
         'nombre': 'Miranda Kerr',
+        'profesion': 'Modelo',
+        'tipo_piel': ['Normal', 'Seca'],
         'rutina': [
             'Agua tibia para abrir los poros',
             'Limpiador suave con aceite de rosa mosqueta',
@@ -378,10 +380,13 @@ RUTINAS_FAMOSOS = {
             'Enjuague con agua fría para cerrar poros'
         ],
         'productos': ['Aceite de rosa mosqueta', 'Aceite de coco orgánico', 'Limpiador natural'],
-        'tiempo': 10
+        'tiempo': 10,
+        'filosofia': 'Enfoque en ingredientes naturales y orgánicos'
     },
     'hailey bieber': {
         'nombre': 'Hailey Bieber',
+        'profesion': 'Modelo',
+        'tipo_piel': ['Normal', 'Mixta'],
         'rutina': [
             'Doble limpieza (aceite + gel)',
             'Agua tibia constante',
@@ -390,10 +395,13 @@ RUTINAS_FAMOSOS = {
             'Protector solar si es de día'
         ],
         'productos': ['Limpiador con aceite', 'Gel limpiador', 'Ácido hialurónico', 'Crema hidratante'],
-        'tiempo': 8
+        'tiempo': 8,
+        'filosofia': 'Glazed donut skin - hidratación profunda'
     },
     'jennie kim': {
         'nombre': 'Jennie Kim (BLACKPINK)',
+        'profesion': 'Artista K-Pop',
+        'tipo_piel': ['Normal', 'Sensible'],
         'rutina': [
             'Limpieza con espuma suave',
             'Tónico hidratante',
@@ -402,10 +410,13 @@ RUTINAS_FAMOSOS = {
             'Mascarilla de hidrogel 2 veces por semana'
         ],
         'productos': ['Limpiador de espuma', 'Tónico coreano', 'Esencia', 'Crema gel'],
-        'tiempo': 12
+        'tiempo': 12,
+        'filosofia': 'Rutina coreana de 10 pasos - hidratación en capas'
     },
     'zendaya': {
         'nombre': 'Zendaya',
+        'profesion': 'Actriz',
+        'tipo_piel': ['Normal', 'Mixta'],
         'rutina': [
             'Limpieza suave sin sulfatos',
             'Exfoliación química semanal',
@@ -414,11 +425,191 @@ RUTINAS_FAMOSOS = {
             'Agua fría al final'
         ],
         'productos': ['Limpiador sin sulfatos', 'Exfoliante AHA/BHA', 'Manteca de karité', 'Aceite de jojoba'],
-        'tiempo': 9
+        'tiempo': 9,
+        'filosofia': 'Productos limpios y naturales'
+    },
+    'rihanna': {
+        'nombre': 'Rihanna',
+        'profesion': 'Empresaria/Artista',
+        'tipo_piel': ['Normal', 'Grasa'],
+        'rutina': [
+            'Limpieza profunda mañana y noche',
+            'Tónico balanceador',
+            'Sérum de vitamina C',
+            'Hidratante ligero oil-free',
+            'SPF 50 religiosamente'
+        ],
+        'productos': ['Fenty Skin cleanser', 'Tónico con niacinamida', 'Vitamina C', 'Hidratante gel'],
+        'tiempo': 7,
+        'filosofia': 'Piel saludable = mejor maquillaje'
+    },
+    'gwyneth paltrow': {
+        'nombre': 'Gwyneth Paltrow',
+        'profesion': 'Actriz/Empresaria',
+        'tipo_piel': ['Seca', 'Sensible'],
+        'rutina': [
+            'Limpieza con aceite limpiador',
+            'Agua termal como tónico',
+            'Sérum antioxidante',
+            'Crema rica en péptidos',
+            'Aceite facial de noche'
+        ],
+        'productos': ['Aceite limpiador', 'Agua termal', 'Sérum con vitamina E', 'Crema de péptidos'],
+        'tiempo': 11,
+        'filosofia': 'Clean beauty - ingredientes puros y sostenibles'
+    },
+    'pharrell williams': {
+        'nombre': 'Pharrell Williams',
+        'profesion': 'Músico/Empresario',
+        'tipo_piel': ['Normal', 'Grasa'],
+        'rutina': [
+            'Limpiador exfoliante diario',
+            'Tónico con ácido salicílico',
+            'Sérum de retinol por la noche',
+            'Hidratante con SPF de día',
+            'Agua muy fría al finalizar'
+        ],
+        'productos': ['Limpiador exfoliante', 'Ácido salicílico', 'Retinol', 'Humanrace skincare'],
+        'tiempo': 8,
+        'filosofia': 'Cuidado preventivo y anti-edad'
+    },
+    'kim kardashian': {
+        'nombre': 'Kim Kardashian',
+        'profesion': 'Empresaria',
+        'tipo_piel': ['Grasa', 'Mixta'],
+        'rutina': [
+            'Doble limpieza profunda',
+            'Exfoliación 3 veces por semana',
+            'Tónico equilibrante',
+            'Suero hidratante',
+            'Crema con SPF siempre'
+        ],
+        'productos': ['Aceite limpiador', 'Exfoliante enzimático', 'Tónico', 'Ácido hialurónico'],
+        'tiempo': 10,
+        'filosofia': 'Consistencia y protección solar extrema'
+    },
+    'rosie huntington whiteley': {
+        'nombre': 'Rosie Huntington-Whiteley',
+        'profesion': 'Modelo/Empresaria',
+        'tipo_piel': ['Seca', 'Normal'],
+        'rutina': [
+            'Limpieza con bálsamo desmaquillante',
+            'Segunda limpieza con espuma suave',
+            'Esencia hidratante',
+            'Sérum facial',
+            'Crema rica en la noche'
+        ],
+        'productos': ['Bálsamo limpiador', 'Espuma suave', 'Esencia', 'Sérum con ácidos'],
+        'tiempo': 12,
+        'filosofia': 'Hidratación en capas - skin first'
+    },
+    'priyanka chopra': {
+        'nombre': 'Priyanka Chopra',
+        'profesion': 'Actriz',
+        'tipo_piel': ['Normal', 'Mixta'],
+        'rutina': [
+            'Limpieza con ingredientes naturales',
+            'Tónico de agua de rosas',
+            'Aceite de coco en el cuerpo',
+            'Hidratante con cúrcuma',
+            'Mascarillas semanales con miel'
+        ],
+        'productos': ['Limpiador ayurvédico', 'Agua de rosas', 'Aceite de coco', 'Cúrcuma'],
+        'tiempo': 9,
+        'filosofia': 'Remedios tradicionales indios y naturales'
+    },
+    'david beckham': {
+        'nombre': 'David Beckham',
+        'profesion': 'Deportista/Empresario',
+        'tipo_piel': ['Normal', 'Grasa'],
+        'rutina': [
+            'Limpiador facial energizante',
+            'Exfoliación 2 veces por semana',
+            'Tónico refrescante',
+            'Hidratante ligero con SPF',
+            'Contorno de ojos'
+        ],
+        'productos': ['Limpiador energizante', 'Exfoliante físico', 'Tónico', 'House 99 products'],
+        'tiempo': 6,
+        'filosofia': 'Rutina simple pero efectiva para hombres'
+    },
+    'victoria beckham': {
+        'nombre': 'Victoria Beckham',
+        'profesion': 'Diseñadora',
+        'tipo_piel': ['Seca', 'Sensible'],
+        'rutina': [
+            'Limpieza ultra suave',
+            'Sérum de ácido hialurónico',
+            'Crema de células madre',
+            'Aceites faciales premium',
+            'SPF alto todos los días'
+        ],
+        'productos': ['Limpiador suave', 'Ácido hialurónico', 'Crema de lujo', 'Aceite facial'],
+        'tiempo': 15,
+        'filosofia': 'Productos de alta gama y tratamientos profesionales'
+    },
+    'chrissy teigen': {
+        'nombre': 'Chrissy Teigen',
+        'profesion': 'Modelo',
+        'tipo_piel': ['Normal', 'Mixta'],
+        'rutina': [
+            'Limpieza doble siempre',
+            'Tónico calmante',
+            'Mascarilla de arcilla 1 vez/semana',
+            'Hidratante ligera',
+            'Parches de hidrogel para ojos'
+        ],
+        'productos': ['Aceite limpiador', 'Gel limpiador', 'Tónico', 'Mascarilla de arcilla'],
+        'tiempo': 10,
+        'filosofia': 'Cuidado accesible pero efectivo'
+    },
+    'elon musk': {
+        'nombre': 'Elon Musk',
+        'profesion': 'Empresario',
+        'tipo_piel': ['Normal', 'Grasa'],
+        'rutina': [
+            'Limpieza rápida mañana y noche',
+            'Hidratante básico',
+            'Protector solar cuando está al aire libre',
+            'Rutina minimalista de 3 pasos'
+        ],
+        'productos': ['Limpiador simple', 'Hidratante básico', 'SPF'],
+        'tiempo': 3,
+        'filosofia': 'Eficiencia máxima - mínimo tiempo'
+    },
+    'selena gomez': {
+        'nombre': 'Selena Gomez',
+        'profesion': 'Artista/Empresaria',
+        'tipo_piel': ['Sensible', 'Mixta'],
+        'rutina': [
+            'Limpiador suave sin fragancia',
+            'Tónico calmante',
+            'Sérum con niacinamida',
+            'Hidratante para piel sensible',
+            'Rare Beauty skincare'
+        ],
+        'productos': ['Limpiador gentil', 'Tónico sin alcohol', 'Niacinamida', 'Crema calmante'],
+        'tiempo': 8,
+        'filosofia': 'Autoaceptación y cuidado gentil'
+    },
+    'harry styles': {
+        'nombre': 'Harry Styles',
+        'profesion': 'Músico/Actor',
+        'tipo_piel': ['Normal'],
+        'rutina': [
+            'Limpiador facial suave',
+            'Agua fría para refrescar',
+            'Hidratante ligero',
+            'Bálsamo labial siempre',
+            'SPF cuando está de gira'
+        ],
+        'productos': ['Limpiador suave', 'Hidratante Aesop', 'Bálsamo labial', 'SPF'],
+        'tiempo': 5,
+        'filosofia': 'Natural y relajado - menos es más'
     }
 }
 
-# Productos recomendados por tipo de piel
+# Productos recomendados por tipo de piel# Productos recomendados por tipo de piel
 PRODUCTOS_RECOMENDADOS = {
     'Normal': {
         'limpiadores': ['CeraVe Hydrating Cleanser', 'Neutrogena Hydro Boost', 'La Roche-Posay Toleriane'],
@@ -471,6 +662,10 @@ def clasificar_intencion(mensaje):
     if any(patron in mensaje for patron in CONOCIMIENTO_BASE['funciones']['patrones']):
         return 'funciones'
     
+    # Rutinas de famosos recomendadas para mi perfil
+    if any(palabra in mensaje for palabra in ['famosos para mí', 'famosos según', 'famosos que me sirven', 'famosos para mi perfil', 'famosos recomendados', 'cuáles famosos']):
+        return 'rutina_famoso_recomendada'
+    
     # Rutinas de famosos
     if any(palabra in mensaje for palabra in ['famoso', 'celebridad', 'celebrity', 'estrella', 'artista famoso']):
         return 'rutina_famoso'
@@ -496,6 +691,16 @@ def clasificar_intencion(mensaje):
         return 'busqueda_salud'
     
     return 'desconocido'
+
+def recomendar_famosos_por_perfil(tipo_piel):
+    """Recomienda rutinas de famosos basándose en el tipo de piel del usuario"""
+    recomendaciones = []
+    
+    for key, famoso in RUTINAS_FAMOSOS.items():
+        if tipo_piel in famoso['tipo_piel']:
+            recomendaciones.append(famoso)
+    
+    return recomendaciones
 
 def extraer_nombre_famoso(mensaje):
     """Extrae el nombre del famoso del mensaje"""
@@ -606,12 +811,44 @@ def procesar_mensaje_chatbot():
             
             datos_extra['rutina'] = rutina_info
     
+    elif intencion == 'rutina_famoso_recomendada':
+        if not usuario:
+            respuesta = '''Primero necesitas crear tu perfil para poder recomendarte rutinas de famosos adecuadas para ti. 😊
+            
+Ve a la pestaña "Perfil" y completa tu información, especialmente tu tipo de piel.'''
+        else:
+            tipo_piel = usuario.get('tipo_piel', 'Normal')
+            recomendaciones = recomendar_famosos_por_perfil(tipo_piel)
+            
+            if recomendaciones:
+                respuesta = f'''**Rutinas de famosos perfectas para tu piel {tipo_piel}:** ⭐\n\n'''
+                
+                for famoso in recomendaciones[:5]:  # Máximo 5 recomendaciones
+                    respuesta += f'''
+**{famoso["nombre"]}** ({famoso["profesion"]})
+• Filosofía: {famoso["filosofia"]}
+• Tiempo: {famoso["tiempo"]} minutos
+• Productos clave: {", ".join(famoso["productos"][:3])}
+
+'''
+                
+                respuesta += '\n💡 **Tip:** Pregúntame por cualquiera de estos famosos para ver su rutina completa.'
+                datos_extra['recomendaciones'] = recomendaciones
+            else:
+                respuesta = f'No encontré rutinas específicas para piel {tipo_piel}, pero puedo mostrarte todas las rutinas disponibles. ¿Te gustaría verlas?'
+    
     elif intencion == 'rutina_famoso':
         nombre_famoso = extraer_nombre_famoso(mensaje)
         
         if nombre_famoso:
             rutina = RUTINAS_FAMOSOS[nombre_famoso]
-            respuesta = f'''**Rutina de {rutina["nombre"]}:** ✨\n\n'''
+            respuesta = f'''**Rutina de {rutina["nombre"]}** ({rutina["profesion"]}) ✨
+
+**Filosofía:** {rutina["filosofia"]}
+**Tipos de piel recomendados:** {", ".join(rutina["tipo_piel"])}
+
+**Pasos de la rutina:**
+'''
             for i, paso in enumerate(rutina['rutina'], 1):
                 respuesta += f'{i}. {paso}\n'
             
@@ -622,14 +859,52 @@ def procesar_mensaje_chatbot():
             
             datos_extra['rutina_famoso'] = rutina
         else:
-            respuesta = '''**Rutinas de celebridades disponibles:** 🌟
-
-• **Miranda Kerr** - Enfoque en aceites naturales
-• **Hailey Bieber** - Doble limpieza y hidratación
-• **Jennie Kim** - Rutina coreana de 10 pasos
-• **Zendaya** - Productos naturales y agua fría
-
-Pregúntame por alguna en específico, por ejemplo: "¿Cuál es la rutina de Hailey Bieber?"'''
+            # Listar todos los famosos disponibles por categoría
+            modelos = []
+            artistas = []
+            empresarios = []
+            otros = []
+            
+            for key, famoso in RUTINAS_FAMOSOS.items():
+                if 'Modelo' in famoso['profesion']:
+                    modelos.append(famoso['nombre'])
+                elif 'Artista' in famoso['profesion'] or 'Músico' in famoso['profesion'] or 'K-Pop' in famoso['profesion']:
+                    artistas.append(famoso['nombre'])
+                elif 'Empresario' in famoso['profesion'] or 'Empresaria' in famoso['profesion']:
+                    empresarios.append(famoso['nombre'])
+                else:
+                    otros.append(famoso['nombre'])
+            
+            respuesta = '''**Rutinas de celebridades disponibles:** 🌟\n\n'''
+            
+            if modelos:
+                respuesta += '**👗 Modelos:**\n'
+                for nombre in modelos:
+                    respuesta += f'• {nombre}\n'
+                respuesta += '\n'
+            
+            if artistas:
+                respuesta += '**🎵 Artistas/Músicos:**\n'
+                for nombre in artistas:
+                    respuesta += f'• {nombre}\n'
+                respuesta += '\n'
+            
+            if empresarios:
+                respuesta += '**💼 Empresarios:**\n'
+                for nombre in empresarios:
+                    respuesta += f'• {nombre}\n'
+                respuesta += '\n'
+            
+            if otros:
+                respuesta += '**⭐ Otros:**\n'
+                for nombre in otros:
+                    respuesta += f'• {nombre}\n'
+                respuesta += '\n'
+            
+            respuesta += '\n💡 Pregúntame por alguna en específico, por ejemplo:\n'
+            respuesta += '• "¿Cuál es la rutina de Hailey Bieber?"\n'
+            respuesta += '• "Rutina de Pharrell Williams"\n'
+            respuesta += '• "¿Qué famosos me recomiendas según mi perfil?"'
     
     elif intencion == 'editar_rutina':
         respuesta = '''Para editar tu rutina puedo ayudarte con: 🛠️
