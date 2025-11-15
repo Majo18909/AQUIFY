@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUIFY - Tu Compañero Musical para el Baño</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>🎵 AQUIFY 💧</h1>
+        <p>Tu Compañero Musical para el Baño</p>
+    </header>
+
+    <!-- Container Principal -->
+    <div class="container">
+        <!-- Tabs de Navegación -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('perfil')">
+                👤 Perfil
+            </button>
+            <button class="tab-button" onclick="switchTab('musica')">
+                🎵 Música
+            </button>
+            <button class="tab-button" onclick="switchTab('chatbot')">
+                🤖 Asistente
+            </button>
+            <button class="tab-button" onclick="switchTab('reproductor')">
+                ▶️ Reproductor
+            </button>
+            <button class="tab-button" onclick="switchTab('temporizador')">
+                ⏱️ Temporizador
+            </button>
+        </div>
+
+        <!-- Tab: Perfil de Usuario -->
+        <div id="tab-perfil" class="tab-content active">
+            <h2>👤 Perfil de Usuario</h2>
+
+            <div id="perfil-display" style="display: none;">
+                <div class="profile-display">
+                    <h3>Tu Perfil</h3>
+                    <div id="perfil-info"></div>
+                    <button class="btn btn-secondary" onclick="editarPerfil()">Editar Perfil</button>
+                </div>
+            </div>
+
+            <div id="perfil-form">
+                <div class="card">
+                    <h3>Crear/Editar Perfil</h3>
+
+                    <div class="form-group">
+                        <label>Género</label>
+                        <select id="genero" onchange="toggleGeneroPersonalizado()">
+                            <option value="Hombre">Hombre</option>
+                            <option value="Mujer">Mujer</option>
+                            <option value="Personalizado">Personalizado</option>
+                            <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+                        </select>
+                    </div>
+
+                    <div id="genero-personalizado" class="custom-gender">
+                        <div class="form-group">
+                            <label>Especifica tu género</label>
+                            <input type="text" id="genero-custom" placeholder="Tu género">
+                        </div>
+                        <div class="form-group">
+                            <label>Pronombres preferidos</label>
+                            <input type="text" id="pronombres" placeholder="Ej: él/ella/elle">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Edad</label>
+                        <input type="number" id="edad" min="1" max="120" placeholder="Tu edad">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Piel</label>
+                        <select id="tipo-piel">
+                            <option value="Normal">Normal</option>
+                            <option value="Seca">Seca</option>
+                            <option value="Mixta">Mixta</option>
+                            <option value="Grasa">Grasa</option>
+                            <option value="Sensible">Sensible</option>
+                            <option value="No sé">No sé</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="guardarPerfil()">Guardar Perfil</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Gestión de Música -->
+        <div id="tab-musica" class="tab-content">
+            <h2>🎵 Gestión de Música</h2>
+
+            <div class="card">
+                <h3>Subir Canción</h3>
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                    <p style="font-size: 3rem; margin-bottom: 1rem;">📁</p>
+                    <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">Haz clic o arrastra archivos aquí</p>
+                    <p style="color: #666;">Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 50MB)</p>
+                    <input type="file" id="file-input" accept=".mp3,.wav,.ogg,.flac,.m4a" style="display: none;"
+                        onchange="subirCancion()">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Tu Playlist</h3>
+                <ul id="song-list" class="song-list"></ul>
+            </div>
+        </div>
+
+        <!-- Tab: Chatbot Asistente -->
+        <div id="tab-chatbot" class="tab-content">
+            <h2>🤖 Asistente AQUIFY</h2>
+
+            <div class="tabs" style="margin-bottom: 1rem;">
+                <button class="btn btn-secondary" onclick="mostrarRutina()">Ver Mi Rutina</button>
+                <button class="btn btn-secondary" onclick="mostrarConsejos()">Consejos</button>
+                <button class="btn btn-secondary" onclick="mostrarRecomendaciones()">Recomendaciones Musicales</button>
+            </div>
+
+            <div id="chatbot-response"></div>
+        </div>
+
+        <!-- Tab: Reproductor -->
+        <div id="tab-reproductor" class="tab-content">
+            <h2>▶️ Reproductor de Música</h2>
+
+            <div class="card">
+                <h3>Selecciona una Canción</h3>
+                <select id="cancion-seleccionada" class="form-group">
+                    <option value="">-- Selecciona una canción --</option>
+                </select>
+            </div>
+
+            <div class="card">
+                <h3>Modo de Reproducción</h3>
+                <div class="form-group">
+                    <label>
+                        <input type="radio" name="modo" value="rutina" checked onchange="toggleTiempoRutina()">
+                        Con Rutina (se pausa automáticamente)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="radio" name="modo" value="libre" onchange="toggleTiempoRutina()">
+                        Reproducción Libre
+                    </label>
+                </div>
+
+                <div id="tiempo-rutina-container" class="form-group">
+                    <label>Tiempo de rutina (minutos)</label>
+                    <input type="number" id="tiempo-rutina" min="1" max="60" value="7">
+                </div>
+
+                <button class="btn btn-primary" onclick="iniciarReproduccion()">▶️ Reproducir</button>
+            </div>
+
+            <!-- Player -->
+            <div id="player-container" style="display: none;">
+                <div class="player">
+                    <div class="player-info">
+                        <h3 id="player-song-name">-</h3>
+                        <p id="player-mode">-</p>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+
+                    <div class="player-controls">
+                        <button onclick="pausarReproduccion()" id="btn-pause">⏸️</button>
+                        <button onclick="reanudarReproduccion()" id="btn-play" style="display: none;">▶️</button>
+                        <button onclick="detenerReproduccion()">⏹️</button>
+                    </div>
+
+                    <div class="timer-display" id="timer-display">00:00</div>
+
+                    <audio id="audio-player" loop></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Temporizador -->
+        <div id="tab-temporizador" class="tab-content">
+            <h2>⏱️ Temporizador</h2>
+
+            <div class="card">
+                <h3>Configurar Temporizador</h3>
+                <div class="timer-control">
+                    <div class="form-group">
+                        <label>Tiempo (minutos)</label>
+                        <input type="number" id="timer-minutes" class="timer-input" min="1" max="60" value="5">
+                    </div>
+                    <button class="btn btn-primary" onclick="iniciarTemporizador()">▶️ Iniciar</button>
+                </div>
+            </div>
+
+            <div id="timer-active" style="display: none;">
+                <div class="player">
+                    <div class="timer-display" id="standalone-timer">05:00</div>
+                    <div class="player-controls">
+                        <button onclick="detenerTemporizador()">⏹️ Detener</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de alertas -->
+    <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 400px;"></div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>

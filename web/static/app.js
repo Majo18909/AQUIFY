@@ -1,0 +1,625 @@
+// Variables globales
+let currentUser = null;
+let playlist = [];
+let audioPlayer = null;
+let timerInterval = null;
+let timerSeconds = 0;
+let rutinaSeconds = 0;
+
+// ============ INICIALIZACIÓN ============
+
+document.addEventListener('DOMContentLoaded', function () {
+    cargarPerfil();
+    cargarCanciones();
+
+    // Setup drag and drop para archivos
+    const uploadArea = document.getElementById('upload-area');
+    if (uploadArea) {
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('file-input').files = files;
+                subirCancion();
+            }
+        });
+    }
+});
+
+// ============ UTILIDADES ============
+
+function switchTab(tabName) {
+    // Ocultar todos los contenidos
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+
+    // Desactivar todos los botones
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(button => button.classList.remove('active'));
+
+    // Activar el tab seleccionado
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    event.target.classList.add('active');
+
+    // Cargar datos específicos si es necesario
+    if (tabName === 'musica') {
+        cargarCanciones();
+    } else if (tabName === 'reproductor') {
+        cargarCancionesEnSelector();
+    }
+}
+
+function showAlert(message, type = 'success') {
+    const container = document.getElementById('alert-container');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.textContent = message;
+
+    container.appendChild(alert);
+
+    setTimeout(() => {
+        alert.remove();
+    }, 5000);
+}
+
+// ============ PERFIL DE USUARIO ============
+
+async function cargarPerfil() {
+    try {
+        const response = await fetch('/api/usuario');
+        const data = await response.json();
+
+        if (data.success) {
+            currentUser = data.usuario;
+            mostrarPerfilDisplay();
+        } else {
+            mostrarPerfilForm();
+        }
+    } catch (error) {
+        console.error('Error al cargar perfil:', error);
+        mostrarPerfilForm();
+    }
+}
+
+function mostrarPerfilDisplay() {
+    const display = document.getElementById('perfil-display');
+    const form = document.getElementById('perfil-form');
+    const info = document.getElementById('perfil-info');
+
+    let genero = currentUser.genero;
+    if (currentUser.genero_personalizado) {
+        genero = currentUser.genero_personalizado;
+    }
+
+    let html = `
+        <div class="profile-item">
+            <span class="profile-label">Género:</span>
+            <span>${genero}</span>
+        </div>
+    `;
+
+    if (currentUser.pronombres) {
+        html += `
+            <div class="profile-item">
+                <span class="profile-label">Pronombres:</span>
+                <span>${currentUser.pronombres}</span>
+            </div>
+        `;
+    }
+
+    html += `
+        <div class="profile-item">
+            <span class="profile-label">Edad:</span>
+            <span>${currentUser.edad} años</span>
+        </div>
+        <div class="profile-item">
+            <span class="profile-label">Tipo de Piel:</span>
+            <span>${currentUser.tipo_piel}</span>
+        </div>
+    `;
+
+    info.innerHTML = html;
+    display.style.display = 'block';
+    form.style.display = 'none';
+}
+
+function mostrarPerfilForm() {
+    const display = document.getElementById('perfil-display');
+    const form = document.getElementById('perfil-form');
+
+    display.style.display = 'none';
+    form.style.display = 'block';
+}
+
+function editarPerfil() {
+    // Cargar datos actuales en el formulario
+    if (currentUser) {
+        document.getElementById('genero').value = currentUser.genero;
+        document.getElementById('edad').value = currentUser.edad;
+        document.getElementById('tipo-piel').value = currentUser.tipo_piel;
+
+        if (currentUser.genero === 'Personalizado') {
+            document.getElementById('genero-custom').value = currentUser.genero_personalizado || '';
+            document.getElementById('pronombres').value = currentUser.pronombres || '';
+            toggleGeneroPersonalizado();
+        }
+    }
+
+    mostrarPerfilForm();
+}
+
+function toggleGeneroPersonalizado() {
+    const genero = document.getElementById('genero').value;
+    const customDiv = document.getElementById('genero-personalizado');
+
+    if (genero === 'Personalizado') {
+        customDiv.classList.add('show');
+    } else {
+        customDiv.classList.remove('show');
+    }
+}
+
+async function guardarPerfil() {
+    const genero = document.getElementById('genero').value;
+    const edad = parseInt(document.getElementById('edad').value);
+    const tipoPiel = document.getElementById('tipo-piel').value;
+
+    if (!edad || edad < 1 || edad > 120) {
+        showAlert('Por favor ingresa una edad válida', 'error');
+        return;
+    }
+
+    const perfil = {
+        genero: genero,
+        edad: edad,
+        tipo_piel: tipoPiel
+    };
+
+    if (genero === 'Personalizado') {
+        perfil.genero_personalizado = document.getElementById('genero-custom').value;
+        perfil.pronombres = document.getElementById('pronombres').value;
+    }
+
+    try {
+        const response = await fetch('/api/usuario', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(perfil)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showAlert('✓ Perfil guardado exitosamente', 'success');
+            await cargarPerfil();
+        } else {
+            showAlert('Error al guardar perfil', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error al guardar perfil', 'error');
+    }
+}
+
+// ============ GESTIÓN DE MÚSICA ============
+
+async function cargarCanciones() {
+    try {
+        const response = await fetch('/api/canciones');
+        const data = await response.json();
+
+        if (data.success) {
+            playlist = data.canciones;
+            mostrarCanciones();
+        }
+    } catch (error) {
+        console.error('Error al cargar canciones:', error);
+    }
+}
+
+function mostrarCanciones() {
+    const list = document.getElementById('song-list');
+
+    if (playlist.length === 0) {
+        list.innerHTML = '<li style="text-align: center; padding: 2rem; color: #666;">No hay canciones. ¡Sube tu primera canción!</li>';
+        return;
+    }
+
+    list.innerHTML = playlist.map(song => `
+        <li class="song-item">
+            <div class="song-info">
+                <span class="song-icon">🎵</span>
+                <div>
+                    <strong>${song.nombre}</strong>
+                    <br>
+                    <small style="color: #666;">${song.archivo}</small>
+                </div>
+            </div>
+            <div class="song-actions">
+                <button class="btn btn-secondary" onclick="reproducirCancion(${song.id})">▶️ Reproducir</button>
+                <button class="btn btn-danger" onclick="eliminarCancion(${song.id})">🗑️</button>
+            </div>
+        </li>
+    `).join('');
+}
+
+async function subirCancion() {
+    const fileInput = document.getElementById('file-input');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showAlert('Por favor selecciona un archivo', 'error');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('archivo', file);
+
+    try {
+        showAlert('Subiendo canción...', 'info');
+
+        const response = await fetch('/api/canciones/subir', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showAlert('✓ Canción agregada exitosamente', 'success');
+            fileInput.value = '';
+            await cargarCanciones();
+        } else {
+            showAlert(data.message || 'Error al subir canción', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error al subir canción', 'error');
+    }
+}
+
+async function eliminarCancion(id) {
+    if (!confirm('¿Estás seguro de eliminar esta canción?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/canciones/${id}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showAlert('✓ Canción eliminada', 'success');
+            await cargarCanciones();
+        } else {
+            showAlert('Error al eliminar canción', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error al eliminar canción', 'error');
+    }
+}
+
+// ============ CHATBOT ============
+
+async function mostrarRutina() {
+    try {
+        const response = await fetch('/api/chatbot/rutina');
+        const data = await response.json();
+
+        const container = document.getElementById('chatbot-response');
+
+        if (!data.success) {
+            container.innerHTML = `
+                <div class="alert alert-error">
+                    ${data.message}
+                </div>
+            `;
+            return;
+        }
+
+        const rutina = data.rutina;
+
+        let html = `
+            <div class="card">
+                <h3>Rutina para Piel ${data.tipo_piel}</h3>
+                <p style="color: var(--azul-primario); font-weight: 600; margin-bottom: 1rem;">
+                    ⏱️ Tiempo total: ${rutina.tiempo_total} minutos
+                </p>
+                <h4 style="color: var(--verde-primario); margin-top: 1.5rem;">Pasos de la Rutina:</h4>
+                <ul class="routine-steps">
+                    ${rutina.rutina.map(paso => `<li class="routine-step">${paso}</li>`).join('')}
+                </ul>
+                <h4 style="color: var(--verde-primario); margin-top: 1.5rem;">Consejos:</h4>
+                <ul class="tips-list">
+                    ${rutina.consejos.map(consejo => `<li class="tip-item">${consejo}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error al obtener rutina', 'error');
+    }
+}
+
+async function mostrarConsejos() {
+    try {
+        const response = await fetch('/api/chatbot/consejos');
+        const data = await response.json();
+
+        const container = document.getElementById('chatbot-response');
+
+        if (!data.success) {
+            container.innerHTML = `
+                <div class="alert alert-error">
+                    ${data.message}
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="card">
+                <h3>Consejos para Piel ${data.tipo_piel}</h3>
+                <ul class="tips-list">
+                    ${data.consejos.map(consejo => `<li class="tip-item">${consejo}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error al obtener consejos', 'error');
+    }
+}
+
+async function mostrarRecomendaciones() {
+    try {
+        const response = await fetch('/api/chatbot/recomendaciones-musica');
+        const data = await response.json();
+
+        const container = document.getElementById('chatbot-response');
+
+        let html = `
+            <div class="card">
+                <h3>🎵 Recomendaciones Musicales</h3>
+                <p style="margin-bottom: 1rem;">Géneros perfectos para tu baño relajante:</p>
+                <ul class="tips-list">
+                    ${data.recomendaciones.map(rec => `<li class="tip-item">${rec}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error al obtener recomendaciones', 'error');
+    }
+}
+
+// ============ REPRODUCTOR ============
+
+function cargarCancionesEnSelector() {
+    const selector = document.getElementById('cancion-seleccionada');
+
+    selector.innerHTML = '<option value="">-- Selecciona una canción --</option>' +
+        playlist.map(song => `<option value="${song.id}">${song.nombre}</option>`).join('');
+}
+
+function toggleTiempoRutina() {
+    const modo = document.querySelector('input[name="modo"]:checked').value;
+    const container = document.getElementById('tiempo-rutina-container');
+
+    if (modo === 'rutina') {
+        container.style.display = 'block';
+
+        // Cargar tiempo sugerido basado en tipo de piel
+        if (currentUser && currentUser.tipo_piel) {
+            const tiemposSugeridos = {
+                'Normal': 7,
+                'Seca': 9,
+                'Mixta': 8,
+                'Grasa': 7,
+                'Sensible': 8,
+                'No sé': 7
+            };
+            document.getElementById('tiempo-rutina').value = tiemposSugeridos[currentUser.tipo_piel] || 7;
+        }
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+function iniciarReproduccion() {
+    const cancionId = parseInt(document.getElementById('cancion-seleccionada').value);
+
+    if (!cancionId) {
+        showAlert('Por favor selecciona una canción', 'error');
+        return;
+    }
+
+    const cancion = playlist.find(s => s.id === cancionId);
+    if (!cancion) {
+        showAlert('Canción no encontrada', 'error');
+        return;
+    }
+
+    const modo = document.querySelector('input[name="modo"]:checked').value;
+
+    audioPlayer = document.getElementById('audio-player');
+    audioPlayer.src = `/musica/${cancion.archivo}`;
+
+    document.getElementById('player-song-name').textContent = cancion.nombre;
+
+    if (modo === 'rutina') {
+        const minutos = parseInt(document.getElementById('tiempo-rutina').value) || 7;
+        rutinaSeconds = minutos * 60;
+        document.getElementById('player-mode').textContent = `Modo Rutina - ${minutos} minutos`;
+
+        audioPlayer.play();
+        iniciarTimerRutina();
+    } else {
+        rutinaSeconds = 0;
+        document.getElementById('player-mode').textContent = 'Modo Libre';
+        audioPlayer.play();
+    }
+
+    document.getElementById('player-container').style.display = 'block';
+    document.getElementById('btn-pause').style.display = 'inline-block';
+    document.getElementById('btn-play').style.display = 'none';
+
+    showAlert('▶️ Reproducción iniciada', 'success');
+}
+
+function iniciarTimerRutina() {
+    timerSeconds = rutinaSeconds;
+
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    actualizarDisplayTimer();
+
+    timerInterval = setInterval(() => {
+        timerSeconds--;
+        actualizarDisplayTimer();
+
+        if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            audioPlayer.pause();
+            showAlert('⏰ ¡Tiempo de rutina completado! La música se ha pausado.', 'info');
+            document.getElementById('btn-pause').style.display = 'none';
+            document.getElementById('btn-play').style.display = 'inline-block';
+        }
+    }, 1000);
+}
+
+function actualizarDisplayTimer() {
+    const minutos = Math.floor(timerSeconds / 60);
+    const segundos = timerSeconds % 60;
+    document.getElementById('timer-display').textContent =
+        `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+    if (rutinaSeconds > 0) {
+        const progress = ((rutinaSeconds - timerSeconds) / rutinaSeconds) * 100;
+        document.getElementById('progress-fill').style.width = `${progress}%`;
+    }
+}
+
+function pausarReproduccion() {
+    if (audioPlayer) {
+        audioPlayer.pause();
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        document.getElementById('btn-pause').style.display = 'none';
+        document.getElementById('btn-play').style.display = 'inline-block';
+    }
+}
+
+function reanudarReproduccion() {
+    if (audioPlayer) {
+        audioPlayer.play();
+        if (rutinaSeconds > 0 && timerSeconds > 0) {
+            iniciarTimerRutina();
+        }
+        document.getElementById('btn-pause').style.display = 'inline-block';
+        document.getElementById('btn-play').style.display = 'none';
+    }
+}
+
+function detenerReproduccion() {
+    if (audioPlayer) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+    }
+
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    document.getElementById('player-container').style.display = 'none';
+    document.getElementById('progress-fill').style.width = '0%';
+    showAlert('⏹️ Reproducción detenida', 'info');
+}
+
+function reproducirCancion(id) {
+    document.getElementById('cancion-seleccionada').value = id;
+    switchTab('reproductor');
+
+    // Esperar a que el tab cambie
+    setTimeout(() => {
+        const tabButton = Array.from(document.querySelectorAll('.tab-button'))
+            .find(btn => btn.textContent.includes('Reproductor'));
+        if (tabButton) {
+            tabButton.click();
+        }
+    }, 100);
+}
+
+// ============ TEMPORIZADOR STANDALONE ============
+
+let standaloneTimerInterval = null;
+let standaloneSeconds = 0;
+
+function iniciarTemporizador() {
+    const minutos = parseInt(document.getElementById('timer-minutes').value);
+
+    if (!minutos || minutos < 1) {
+        showAlert('Por favor ingresa un tiempo válido', 'error');
+        return;
+    }
+
+    standaloneSeconds = minutos * 60;
+
+    document.getElementById('timer-active').style.display = 'block';
+    actualizarStandaloneTimer();
+
+    if (standaloneTimerInterval) {
+        clearInterval(standaloneTimerInterval);
+    }
+
+    standaloneTimerInterval = setInterval(() => {
+        standaloneSeconds--;
+        actualizarStandaloneTimer();
+
+        if (standaloneSeconds <= 0) {
+            clearInterval(standaloneTimerInterval);
+            showAlert('⏰ ¡Tiempo terminado!', 'info');
+        }
+    }, 1000);
+
+    showAlert('⏱️ Temporizador iniciado', 'success');
+}
+
+function actualizarStandaloneTimer() {
+    const minutos = Math.floor(standaloneSeconds / 60);
+    const segundos = standaloneSeconds % 60;
+    document.getElementById('standalone-timer').textContent =
+        `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+}
+
+function detenerTemporizador() {
+    if (standaloneTimerInterval) {
+        clearInterval(standaloneTimerInterval);
+    }
+    document.getElementById('timer-active').style.display = 'none';
+    showAlert('⏹️ Temporizador detenido', 'info');
+}
