@@ -76,7 +76,9 @@ function showAlert(message, type = 'success') {
 
 async function cargarPerfil() {
     try {
-        const response = await fetch('/api/usuario');
+        const response = await fetch('/api/usuario', {
+            credentials: 'include'
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -196,7 +198,8 @@ async function guardarPerfil() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(perfil)
+            credentials: 'include',
+            body: JSON.stringify(formData)
         });
 
         const data = await response.json();
@@ -217,7 +220,9 @@ async function guardarPerfil() {
 
 async function cargarCanciones() {
     try {
-        const response = await fetch('/api/canciones');
+        const response = await fetch('/api/canciones', {
+            credentials: 'include'
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -272,6 +277,7 @@ async function subirCancion() {
 
         const response = await fetch('/api/canciones/subir', {
             method: 'POST',
+            credentials: 'include',
             body: formData
         });
 
@@ -297,10 +303,9 @@ async function eliminarCancion(id) {
 
     try {
         const response = await fetch(`/api/canciones/${id}`, {
-            method: 'DELETE'
-        });
-
-        const data = await response.json();
+            method: 'DELETE',
+            credentials: 'include'
+        }); const data = await response.json();
 
         if (data.success) {
             showAlert('✓ Canción eliminada', 'success');
@@ -318,7 +323,9 @@ async function eliminarCancion(id) {
 
 async function mostrarRutina() {
     try {
-        const response = await fetch('/api/chatbot/rutina');
+        const response = await fetch('/api/chatbot/rutina', {
+            credentials: 'include'
+        });
         const data = await response.json();
 
         const container = document.getElementById('chatbot-response');
@@ -360,7 +367,9 @@ async function mostrarRutina() {
 
 async function mostrarConsejos() {
     try {
-        const response = await fetch('/api/chatbot/consejos');
+        const response = await fetch('/api/chatbot/consejos', {
+            credentials: 'include'
+        });
         const data = await response.json();
 
         const container = document.getElementById('chatbot-response');

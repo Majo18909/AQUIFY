@@ -4,18 +4,22 @@ Aplicación web Flask para AQUIFY
 Servidor principal con API REST
 """
 
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import json
 from datetime import datetime
 from pathlib import Path
+import secrets
 
 app = Flask(__name__, 
             template_folder='web/templates',
             static_folder='web/static')
-CORS(app)
+CORS(app, supports_credentials=True)
+
+# Clave secreta para sesiones
+app.secret_key = secrets.token_hex(32)
 
 # Configuración
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
@@ -27,9 +31,25 @@ ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['DATOS_FOLDER'], exist_ok=True)
 
-# Archivos de datos
-USUARIO_FILE = os.path.join(app.config['DATOS_FOLDER'], 'usuario.json')
-PLAYLIST_FILE = os.path.join(app.config['DATOS_FOLDER'], 'playlist.json')
+def get_user_id():
+    """Obtiene o crea un ID único para cada usuario"""
+    if 'user_id' not in session:
+        session['user_id'] = secrets.token_hex(16)
+    return session['user_id']
+
+def get_user_file(filename):
+    """Obtiene la ruta del archivo específico del usuario"""
+    user_id = get_user_id()
+    user_dir = os.path.join(app.config['DATOS_FOLDER'], user_id)
+    os.makedirs(user_dir, exist_ok=True)
+    return os.path.join(user_dir, filename)
+
+def get_user_music_dir():
+    """Obtiene el directorio de música del usuario"""
+    user_id = get_user_id()
+    music_dir = os.path.join(app.config['UPLOAD_FOLDER'], user_id)
+    os.makedirs(music_dir, exist_ok=True)
+    return music_dir
 
 def allowed_file(filename):
     """Verifica si el archivo tiene una extensión permitida"""
@@ -155,7 +175,8 @@ def index():
 @app.route('/api/usuario', methods=['GET'])
 def obtener_usuario():
     """Obtiene el perfil del usuario"""
-    usuario = cargar_json(USUARIO_FILE, None)
+    usuario_file = get_user_file('usuario.json')
+    usuario = cargar_json(usuario_file, None)
     if usuario:
         return jsonify({'success': True, 'usuario': usuario})
     return jsonify({'success': False, 'message': 'No hay perfil creado'})
@@ -164,6 +185,7 @@ def obtener_usuario():
 def crear_usuario():
     """Crea o actualiza el perfil del usuario"""
     data = request.json
+    usuario_file = get_user_file('usuario.json')
     
     usuario = {
         'genero': data.get('genero'),
@@ -174,7 +196,7 @@ def crear_usuario():
         'fecha_creacion': datetime.now().isoformat()
     }
     
-    if guardar_json(USUARIO_FILE, usuario):
+    if guardar_json(usuario_file, usuario):
         return jsonify({'success': True, 'message': 'Perfil creado exitosamente'})
     return jsonify({'success': False, 'message': 'Error al guardar perfil'})
 
@@ -183,7 +205,8 @@ def crear_usuario():
 @app.route('/api/canciones', methods=['GET'])
 def obtener_canciones():
     """Obtiene la lista de canciones"""
-    playlist = cargar_json(PLAYLIST_FILE, [])
+    playlist_file = get_user_file('playlist.json')
+    playlist = cargar_json(playlist_file, [])
     return jsonify({'success': True, 'canciones': playlist})
 
 @app.route('/api/canciones/subir', methods=['POST'])
@@ -199,13 +222,15 @@ def subir_cancion():
     
     if archivo and allowed_file(archivo.filename):
         filename = secure_filename(archivo.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        user_music_dir = get_user_music_dir()
+        filepath = os.path.join(user_music_dir, filename)
         
         # Guardar archivo
         archivo.save(filepath)
         
         # Actualizar playlist
-        playlist = cargar_json(PLAYLIST_FILE, [])
+        playlist_file = get_user_file('playlist.json')
+        playlist = cargar_json(playlist_file, [])
         
         cancion = {
             'id': len(playlist) + 1,
@@ -216,7 +241,7 @@ def subir_cancion():
         }
         
         playlist.append(cancion)
-        guardar_json(PLAYLIST_FILE, playlist)
+        guardar_json(playlist_file, playlist)
         
         return jsonify({'success': True, 'message': 'Canción agregada exitosamente', 'cancion': cancion})
     
@@ -225,7 +250,8 @@ def subir_cancion():
 @app.route('/api/canciones/<int:id>', methods=['DELETE'])
 def eliminar_cancion(id):
     """Elimina una canción"""
-    playlist = cargar_json(PLAYLIST_FILE, [])
+    playlist_file = get_user_file('playlist.json')
+    playlist = cargar_json(playlist_file, [])
     
     cancion_encontrada = None
     for i, cancion in enumerate(playlist):
@@ -238,7 +264,7 @@ def eliminar_cancion(id):
         if os.path.exists(cancion_encontrada['ruta']):
             os.remove(cancion_encontrada['ruta'])
         
-        guardar_json(PLAYLIST_FILE, playlist)
+        guardar_json(playlist_file, playlist)
         return jsonify({'success': True, 'message': 'Canción eliminada'})
     
     return jsonify({'success': False, 'message': 'Canción no encontrada'})
@@ -246,14 +272,16 @@ def eliminar_cancion(id):
 @app.route('/musica/<filename>')
 def servir_musica(filename):
     """Sirve archivos de música"""
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    user_music_dir = get_user_music_dir()
+    return send_from_directory(user_music_dir, filename)
 
 # ============ API - CHATBOT ============
 
 @app.route('/api/chatbot/rutina', methods=['GET'])
 def obtener_rutina():
     """Obtiene la rutina según el tipo de piel del usuario"""
-    usuario = cargar_json(USUARIO_FILE, None)
+    usuario_file = get_user_file('usuario.json')
+    usuario = cargar_json(usuario_file, None)
     
     if not usuario:
         return jsonify({'success': False, 'message': 'Debes crear un perfil primero'})
@@ -266,7 +294,8 @@ def obtener_rutina():
 @app.route('/api/chatbot/consejos', methods=['GET'])
 def obtener_consejos():
     """Obtiene consejos según el tipo de piel"""
-    usuario = cargar_json(USUARIO_FILE, None)
+    usuario_file = get_user_file('usuario.json')
+    usuario = cargar_json(usuario_file, None)
     
     if not usuario:
         return jsonify({'success': False, 'message': 'Debes crear un perfil primero'})
