@@ -199,7 +199,7 @@ async function guardarPerfil() {
                 'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify(formData)
+            body: JSON.stringify(perfil)
         });
 
         const data = await response.json();
