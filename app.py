@@ -188,6 +188,12 @@ def obtener_usuario():
 def crear_usuario():
     """Crea o actualiza el perfil del usuario"""
     data = request.json
+    
+    # Asegurar que exista el directorio del usuario
+    user_id = get_user_id()
+    user_dir = os.path.join(app.config['DATOS_FOLDER'], user_id)
+    os.makedirs(user_dir, exist_ok=True)
+    
     usuario_file = get_user_file('usuario.json')
     
     usuario = {
@@ -196,11 +202,17 @@ def crear_usuario():
         'pronombres': data.get('pronombres'),
         'edad': data.get('edad'),
         'tipo_piel': data.get('tipo_piel'),
-        'fecha_creacion': datetime.now().isoformat()
+        'fecha_creacion': datetime.now().isoformat(),
+        'user_id': user_id
     }
     
+    # Intentar guardar y verificar
     if guardar_json(usuario_file, usuario):
-        return jsonify({'success': True, 'message': 'Perfil creado exitosamente'})
+        # Verificar que se guardó correctamente
+        verificacion = cargar_json(usuario_file, None)
+        if verificacion:
+            return jsonify({'success': True, 'message': 'Perfil creado exitosamente', 'usuario': usuario})
+    
     return jsonify({'success': False, 'message': 'Error al guardar perfil'})
 
 # ============ API - MÚSICA ============
@@ -563,20 +575,6 @@ RUTINAS_FAMOSOS = {
         'tiempo': 10,
         'filosofia': 'Cuidado accesible pero efectivo'
     },
-    'elon musk': {
-        'nombre': 'Elon Musk',
-        'profesion': 'Empresario',
-        'tipo_piel': ['Normal', 'Grasa'],
-        'rutina': [
-            'Limpieza rápida mañana y noche',
-            'Hidratante básico',
-            'Protector solar cuando está al aire libre',
-            'Rutina minimalista de 3 pasos'
-        ],
-        'productos': ['Limpiador simple', 'Hidratante básico', 'SPF'],
-        'tiempo': 3,
-        'filosofia': 'Eficiencia máxima - mínimo tiempo'
-    },
     'selena gomez': {
         'nombre': 'Selena Gomez',
         'profesion': 'Artista/Empresaria',
@@ -662,11 +660,17 @@ def clasificar_intencion(mensaje):
     if any(patron in mensaje for patron in CONOCIMIENTO_BASE['funciones']['patrones']):
         return 'funciones'
     
-    # Rutinas de famosos recomendadas para mi perfil
-    if any(palabra in mensaje for palabra in ['famosos para mí', 'famosos según', 'famosos que me sirven', 'famosos para mi perfil', 'famosos recomendados', 'cuáles famosos']):
+    # Rutinas de famosos recomendadas para mi perfil (debe ir ANTES de rutina_famoso general)
+    if any(palabra in mensaje for palabra in ['recomiendas según', 'para mi perfil', 'para mí según', 'me sirven según', 'adecuados para mí', 'según mi piel', 'me convienen']):
         return 'rutina_famoso_recomendada'
     
-    # Rutinas de famosos
+    if 'qué famosos' in mensaje and ('mi' in mensaje or 'perfil' in mensaje or 'piel' in mensaje):
+        return 'rutina_famoso_recomendada'
+    
+    if 'cuáles famosos' in mensaje and ('mi' in mensaje or 'perfil' in mensaje or 'piel' in mensaje):
+        return 'rutina_famoso_recomendada'
+    
+    # Rutinas de famosos (general)
     if any(palabra in mensaje for palabra in ['famoso', 'celebridad', 'celebrity', 'estrella', 'artista famoso']):
         return 'rutina_famoso'
     
