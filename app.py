@@ -187,33 +187,41 @@ def obtener_usuario():
 @app.route('/api/usuario', methods=['POST'])
 def crear_usuario():
     """Crea o actualiza el perfil del usuario"""
-    data = request.json
-    
-    # Asegurar que exista el directorio del usuario
-    user_id = get_user_id()
-    user_dir = os.path.join(app.config['DATOS_FOLDER'], user_id)
-    os.makedirs(user_dir, exist_ok=True)
-    
-    usuario_file = get_user_file('usuario.json')
-    
-    usuario = {
-        'genero': data.get('genero'),
-        'genero_personalizado': data.get('genero_personalizado'),
-        'pronombres': data.get('pronombres'),
-        'edad': data.get('edad'),
-        'tipo_piel': data.get('tipo_piel'),
-        'fecha_creacion': datetime.now().isoformat(),
-        'user_id': user_id
-    }
-    
-    # Intentar guardar y verificar
-    if guardar_json(usuario_file, usuario):
-        # Verificar que se guardó correctamente
-        verificacion = cargar_json(usuario_file, None)
-        if verificacion:
-            return jsonify({'success': True, 'message': 'Perfil creado exitosamente', 'usuario': usuario})
-    
-    return jsonify({'success': False, 'message': 'Error al guardar perfil'})
+    try:
+        data = request.json
+        
+        # Asegurar que exista el directorio del usuario
+        user_id = get_user_id()
+        usuario_file = get_user_file('usuario.json')
+        
+        usuario = {
+            'genero': data.get('genero'),
+            'genero_personalizado': data.get('genero_personalizado'),
+            'pronombres': data.get('pronombres'),
+            'edad': data.get('edad'),
+            'tipo_piel': data.get('tipo_piel'),
+            'fecha_creacion': datetime.now().isoformat(),
+            'user_id': user_id
+        }
+        
+        # Guardar perfil
+        if guardar_json(usuario_file, usuario):
+            return jsonify({
+                'success': True, 
+                'message': 'Perfil creado exitosamente', 
+                'usuario': usuario
+            })
+        else:
+            return jsonify({
+                'success': False, 
+                'message': 'Error al escribir el archivo'
+            })
+            
+    except Exception as e:
+        return jsonify({
+            'success': False, 
+            'message': f'Error al guardar perfil: {str(e)}'
+        })
 
 # ============ API - MÚSICA ============
 
@@ -867,48 +875,63 @@ Ve a la pestaña "Perfil" y completa tu información, especialmente tu tipo de p
             modelos = []
             artistas = []
             empresarios = []
-            otros = []
+            actores = []
             
             for key, famoso in RUTINAS_FAMOSOS.items():
-                if 'Modelo' in famoso['profesion']:
-                    modelos.append(famoso['nombre'])
-                elif 'Artista' in famoso['profesion'] or 'Músico' in famoso['profesion'] or 'K-Pop' in famoso['profesion']:
-                    artistas.append(famoso['nombre'])
-                elif 'Empresario' in famoso['profesion'] or 'Empresaria' in famoso['profesion']:
-                    empresarios.append(famoso['nombre'])
+                profesion = famoso.get('profesion', '')
+                nombre = famoso.get('nombre', '')
+                
+                if 'Modelo' in profesion:
+                    modelos.append(nombre)
+                elif any(x in profesion for x in ['Artista', 'Músico', 'K-Pop']):
+                    artistas.append(nombre)
+                elif any(x in profesion for x in ['Empresario', 'Empresaria']):
+                    empresarios.append(nombre)
+                elif 'Actriz' in profesion or 'Actor' in profesion:
+                    actores.append(nombre)
                 else:
-                    otros.append(famoso['nombre'])
+                    actores.append(nombre)
             
-            respuesta = '''**Rutinas de celebridades disponibles:** 🌟\n\n'''
+            respuesta = '**Rutinas de celebridades disponibles:** 🌟\n\n'
             
             if modelos:
                 respuesta += '**👗 Modelos:**\n'
-                for nombre in modelos:
+                for nombre in sorted(modelos):
                     respuesta += f'• {nombre}\n'
                 respuesta += '\n'
             
             if artistas:
                 respuesta += '**🎵 Artistas/Músicos:**\n'
-                for nombre in artistas:
+                for nombre in sorted(artistas):
                     respuesta += f'• {nombre}\n'
                 respuesta += '\n'
             
             if empresarios:
                 respuesta += '**💼 Empresarios:**\n'
-                for nombre in empresarios:
+                for nombre in sorted(empresarios):
                     respuesta += f'• {nombre}\n'
                 respuesta += '\n'
             
-            if otros:
-                respuesta += '**⭐ Otros:**\n'
-                for nombre in otros:
+            if actores:
+                respuesta += '**🎬 Actores/Otros:**\n'
+                for nombre in sorted(actores):
                     respuesta += f'• {nombre}\n'
                 respuesta += '\n'
             
-            respuesta += '\n💡 Pregúntame por alguna en específico, por ejemplo:\n'
+            respuesta += '\n💡 **Pregúntame por alguna en específico, por ejemplo:**\n'
             respuesta += '• "¿Cuál es la rutina de Hailey Bieber?"\n'
             respuesta += '• "Rutina de Pharrell Williams"\n'
-            respuesta += '• "¿Qué famosos me recomiendas según mi perfil?"'
+            respuesta += '• "Muéstrame la rutina de Rihanna"\n'
+            respuesta += '• "¿Qué famosos me recomiendas según mi perfil?"\n\n'
+            respuesta += f'**Total: {len(RUTINAS_FAMOSOS)} rutinas de celebridades disponibles**'
+            
+            datos_extra['total_famosos'] = len(RUTINAS_FAMOSOS)
+            datos_extra['categorias'] = {
+                'modelos': modelos,
+                'artistas': artistas,
+                'empresarios': empresarios,
+                'actores': actores
+            }
     
     elif intencion == 'editar_rutina':
         respuesta = '''Para editar tu rutina puedo ayudarte con: 🛠️
