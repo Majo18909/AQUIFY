@@ -19,10 +19,9 @@ from urllib.parse import quote_plus
 app = Flask(__name__, 
             template_folder='web/templates',
             static_folder='web/static')
-CORS(app, supports_credentials=True)
 
-# Clave secreta para sesiones
-app.secret_key = secrets.token_hex(32)
+# Clave secreta para sesiones - usar variable de entorno en producción o generar una fija
+app.secret_key = os.environ.get('SECRET_KEY', 'aquify-secret-key-2024-vercel-deployment')
 
 # Configuración - Detectar si estamos en Vercel
 IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
@@ -41,6 +40,9 @@ else:
 # Configuración general
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
+
+# CORS debe ir después de la configuración
+CORS(app, supports_credentials=True)
 
 # Asegurar que existen los directorios
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
