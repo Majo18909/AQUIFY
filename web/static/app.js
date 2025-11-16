@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const uploadInfo = document.getElementById('upload-info');
         if (uploadInfo) {
-            uploadInfo.textContent = 'Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 4MB en Vercel)';
+            uploadInfo.textContent = 'Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 5MB en Vercel - Almacenamiento temporal)';
         }
     }
 
@@ -283,8 +283,8 @@ async function subirCancion() {
     }
 
     // Límites diferentes para Vercel vs Local
-    const maxSize = isVercel ? 4 * 1024 * 1024 : 50 * 1024 * 1024; // 4MB en Vercel, 50MB en local
-    const maxSizeMB = isVercel ? '4MB' : '50MB';
+    const maxSize = isVercel ? 5 * 1024 * 1024 : 50 * 1024 * 1024; // 5MB en Vercel, 50MB en local
+    const maxSizeMB = isVercel ? '5MB' : '50MB';
 
     if (file.size > maxSize) {
         showAlert(`El archivo es demasiado grande (máximo ${maxSizeMB})`, 'error');

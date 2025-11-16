@@ -27,18 +27,24 @@ app.secret_key = os.environ.get('SECRET_KEY', 'aquify-secret-key-2024-vercel-dep
 IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
 
 if IS_VERCEL:
-    # En Vercel, usar almacenamiento temporal
+    # En Vercel, usar almacenamiento temporal y límite de tamaño reducido
     import tempfile
     tmp_dir = tempfile.gettempdir()
     app.config['UPLOAD_FOLDER'] = os.path.join(tmp_dir, 'aquify_musica')
     app.config['DATOS_FOLDER'] = os.path.join(tmp_dir, 'aquify_datos')
+    app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max en Vercel para evitar timeouts
+    # Usar cookies más persistentes en Vercel
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SECURE'] = True
+    print("🚀 Ejecutando en VERCEL - Límite de archivos: 5MB, almacenamiento temporal")
 else:
     # En local, usar carpetas normales
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'musica')
     app.config['DATOS_FOLDER'] = os.path.join(os.getcwd(), 'datos')
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max en local
+    print("💻 Ejecutando en LOCAL - Límite de archivos: 50MB")
 
 # Configuración general
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
 
 # CORS debe ir después de la configuración
