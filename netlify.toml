@@ -1,0 +1,25 @@
+# Configuración de Netlify para AQUIFY
+# NOTA: Esta configuración es solo para el FRONTEND
+# El backend debe mantenerse en Render u otra plataforma compatible con Python
+
+[build]
+  publish = "web"
+  command = "echo 'Deploying frontend only'"
+
+# Redirigir todas las rutas al index.html para SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers de seguridad
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Variables de entorno (configurar en Netlify UI)
+# BACKEND_URL = "https://aquify.onrender.com"
