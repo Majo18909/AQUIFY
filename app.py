@@ -256,29 +256,42 @@ def obtener_canciones():
 def subir_cancion():
     """Sube un archivo de música"""
     try:
+        print("\n=== INICIO SUBIDA DE CANCIÓN ===")
+        print(f"Request files: {list(request.files.keys())}")
+        
         if 'archivo' not in request.files:
+            print("ERROR: No se encontró 'archivo' en request.files")
             return jsonify({'success': False, 'message': 'No se envió archivo'})
         
         archivo = request.files['archivo']
+        print(f"Archivo recibido: {archivo.filename}")
         
         if archivo.filename == '':
+            print("ERROR: Nombre de archivo vacío")
             return jsonify({'success': False, 'message': 'No se seleccionó archivo'})
         
         if archivo and allowed_file(archivo.filename):
             filename = secure_filename(archivo.filename)
+            print(f"Filename seguro: {filename}")
+            
             user_music_dir = get_user_music_dir()
+            print(f"Directorio de música: {user_music_dir}")
             
             # Asegurar que el directorio existe
             os.makedirs(user_music_dir, exist_ok=True)
             
             filepath = os.path.join(user_music_dir, filename)
+            print(f"Ruta completa: {filepath}")
             
             # Guardar archivo
+            print("Guardando archivo...")
             archivo.save(filepath)
+            print(f"✓ Archivo guardado: {os.path.exists(filepath)}")
             
             # Actualizar playlist
             playlist_file = get_user_file('playlist.json')
             playlist = cargar_json(playlist_file, [])
+            print(f"Playlist actual tiene {len(playlist)} canciones")
             
             cancion = {
                 'id': len(playlist) + 1,
@@ -289,16 +302,25 @@ def subir_cancion():
             }
             
             playlist.append(cancion)
+            print(f"Nueva canción: {cancion['nombre']}")
             
             if guardar_json(playlist_file, playlist):
+                print("✓ Playlist guardada exitosamente")
+                print("=== FIN SUBIDA DE CANCIÓN ===\n")
                 return jsonify({'success': True, 'message': 'Canción agregada exitosamente', 'cancion': cancion})
             else:
+                print("ERROR: No se pudo guardar la playlist")
                 return jsonify({'success': False, 'message': 'Error al guardar la playlist'})
         
-        return jsonify({'success': False, 'message': 'Formato de archivo no permitido'})
+        print(f"ERROR: Formato no permitido: {archivo.filename}")
+        return jsonify({'success': False, 'message': 'Formato de archivo no permitido. Usa: MP3, WAV, OGG, FLAC o M4A'})
     
     except Exception as e:
-        print(f"Error al subir canción: {str(e)}")
+        import traceback
+        print(f"\n!!! ERROR CRÍTICO !!!")
+        print(f"Error: {str(e)}")
+        print(f"Traceback:\n{traceback.format_exc()}")
+        print("=== FIN CON ERROR ===\n")
         return jsonify({'success': False, 'message': f'Error al subir archivo: {str(e)}'})
 
 @app.route('/api/canciones/<int:id>', methods=['DELETE'])

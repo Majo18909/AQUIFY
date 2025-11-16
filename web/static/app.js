@@ -269,10 +269,28 @@ async function subirCancion() {
         return;
     }
 
+    // Verificar tamaño (50MB máximo)
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+        showAlert('El archivo es demasiado grande (máximo 50MB)', 'error');
+        return;
+    }
+
+    // Verificar tipo de archivo
+    const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/x-m4a'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const allowedExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
+
+    if (!allowedExtensions.includes(fileExtension)) {
+        showAlert('Formato no permitido. Usa: MP3, WAV, OGG, FLAC o M4A', 'error');
+        return;
+    }
+
     const formData = new FormData();
     formData.append('archivo', file);
 
     try {
+        console.log('Subiendo archivo:', file.name, 'Tamaño:', file.size, 'bytes');
         showAlert('Subiendo canción...', 'info');
 
         const response = await fetch('/api/canciones/subir', {
@@ -281,7 +299,10 @@ async function subirCancion() {
             body: formData
         });
 
+        console.log('Respuesta recibida:', response.status);
+
         const data = await response.json();
+        console.log('Datos:', data);
 
         if (data.success) {
             showAlert('✓ Canción agregada exitosamente', 'success');
@@ -291,8 +312,8 @@ async function subirCancion() {
             showAlert(data.message || 'Error al subir canción', 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        showAlert('Error al subir canción', 'error');
+        console.error('Error completo:', error);
+        showAlert('Error al subir canción: ' + error.message, 'error');
     }
 }
 
