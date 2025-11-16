@@ -5,32 +5,12 @@
         {
             "src": "app.py",
             "use": "@vercel/python"
-        },
-        {
-            "src": "web/static/**",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "web/templates/**",
-            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
-            "src": "/static/(.*)",
-            "dest": "/web/static/$1"
-        },
-        {
-            "src": "/musica/(.*)",
-            "dest": "/app.py"
-        },
-        {
-            "src": "/api/(.*)",
-            "dest": "/app.py"
-        },
-        {
             "src": "/(.*)",
-            "dest": "/app.py"
+            "dest": "app.py"
         }
     ],
     "env": {
