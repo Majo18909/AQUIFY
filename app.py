@@ -255,40 +255,51 @@ def obtener_canciones():
 @app.route('/api/canciones/subir', methods=['POST'])
 def subir_cancion():
     """Sube un archivo de música"""
-    if 'archivo' not in request.files:
-        return jsonify({'success': False, 'message': 'No se envió archivo'})
+    try:
+        if 'archivo' not in request.files:
+            return jsonify({'success': False, 'message': 'No se envió archivo'})
+        
+        archivo = request.files['archivo']
+        
+        if archivo.filename == '':
+            return jsonify({'success': False, 'message': 'No se seleccionó archivo'})
+        
+        if archivo and allowed_file(archivo.filename):
+            filename = secure_filename(archivo.filename)
+            user_music_dir = get_user_music_dir()
+            
+            # Asegurar que el directorio existe
+            os.makedirs(user_music_dir, exist_ok=True)
+            
+            filepath = os.path.join(user_music_dir, filename)
+            
+            # Guardar archivo
+            archivo.save(filepath)
+            
+            # Actualizar playlist
+            playlist_file = get_user_file('playlist.json')
+            playlist = cargar_json(playlist_file, [])
+            
+            cancion = {
+                'id': len(playlist) + 1,
+                'nombre': Path(filename).stem,
+                'archivo': filename,
+                'ruta': filepath,
+                'fecha_agregada': datetime.now().isoformat()
+            }
+            
+            playlist.append(cancion)
+            
+            if guardar_json(playlist_file, playlist):
+                return jsonify({'success': True, 'message': 'Canción agregada exitosamente', 'cancion': cancion})
+            else:
+                return jsonify({'success': False, 'message': 'Error al guardar la playlist'})
+        
+        return jsonify({'success': False, 'message': 'Formato de archivo no permitido'})
     
-    archivo = request.files['archivo']
-    
-    if archivo.filename == '':
-        return jsonify({'success': False, 'message': 'No se seleccionó archivo'})
-    
-    if archivo and allowed_file(archivo.filename):
-        filename = secure_filename(archivo.filename)
-        user_music_dir = get_user_music_dir()
-        filepath = os.path.join(user_music_dir, filename)
-        
-        # Guardar archivo
-        archivo.save(filepath)
-        
-        # Actualizar playlist
-        playlist_file = get_user_file('playlist.json')
-        playlist = cargar_json(playlist_file, [])
-        
-        cancion = {
-            'id': len(playlist) + 1,
-            'nombre': Path(filename).stem,
-            'archivo': filename,
-            'ruta': filepath,
-            'fecha_agregada': datetime.now().isoformat()
-        }
-        
-        playlist.append(cancion)
-        guardar_json(playlist_file, playlist)
-        
-        return jsonify({'success': True, 'message': 'Canción agregada exitosamente', 'cancion': cancion})
-    
-    return jsonify({'success': False, 'message': 'Formato de archivo no permitido'})
+    except Exception as e:
+        print(f"Error al subir canción: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error al subir archivo: {str(e)}'})
 
 @app.route('/api/canciones/<int:id>', methods=['DELETE'])
 def eliminar_cancion(id):
