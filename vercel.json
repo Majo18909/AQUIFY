@@ -3,16 +3,26 @@
     "builds": [
         {
             "src": "api/index.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb"
+            }
         }
     ],
     "routes": [
         {
+            "src": "/static/(.*)",
+            "dest": "/web/static/$1"
+        },
+        {
             "src": "/(.*)",
-            "dest": "api/index.py"
+            "dest": "/api/index.py"
         }
     ],
-    "env": {
-        "FLASK_ENV": "production"
-    }
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/api/index.py"
+        }
+    ]
 }

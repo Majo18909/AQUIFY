@@ -7,8 +7,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-# Importar la app Flask desde el directorio raíz
-from app import app as application
+# Configurar las rutas de templates y static antes de importar app
+os.environ['VERCEL'] = '1'
 
-# Exportar para Vercel
-app = application
+# Importar la app Flask desde el directorio raíz
+from app import app
+
+# Handler para Vercel
+def handler(event, context):
+    """Handler principal para Vercel serverless"""
+    return app(event, context)
