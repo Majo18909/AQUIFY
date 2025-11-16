@@ -44,7 +44,13 @@
                 <div class="profile-display">
                     <h3>Tu Perfil</h3>
                     <div id="perfil-info"></div>
-                    <button class="btn btn-secondary" onclick="editarPerfil()">Editar Perfil</button>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn btn-secondary" onclick="editarPerfil()">Editar Perfil</button>
+                        <button class="btn" style="background: #dc3545; color: white;"
+                            onclick="limpiarPerfilLocal()">Borrar Perfil del Dispositivo</button>
+                    </div>
+                    <p style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">💾 Tu perfil está guardado en este
+                        dispositivo</p>
                 </div>
             </div>
 

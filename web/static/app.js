@@ -89,6 +89,20 @@ function showAlert(message, type = 'success') {
 
 async function cargarPerfil() {
     try {
+        // Primero intentar cargar desde localStorage (persistencia en el dispositivo)
+        const perfilLocal = localStorage.getItem('aquify_perfil');
+
+        if (perfilLocal) {
+            currentUser = JSON.parse(perfilLocal);
+            console.log('✓ Perfil cargado desde localStorage (dispositivo)');
+            mostrarPerfilDisplay();
+
+            // También sincronizar con el servidor en segundo plano
+            sincronizarPerfilConServidor(currentUser);
+            return;
+        }
+
+        // Si no hay perfil local, intentar cargar desde el servidor
         const response = await fetch('/api/usuario', {
             credentials: 'include'
         });
@@ -96,13 +110,41 @@ async function cargarPerfil() {
 
         if (data.success) {
             currentUser = data.usuario;
+            // Guardar en localStorage para la próxima vez
+            localStorage.setItem('aquify_perfil', JSON.stringify(currentUser));
+            console.log('✓ Perfil cargado desde servidor y guardado localmente');
             mostrarPerfilDisplay();
         } else {
             mostrarPerfilForm();
         }
     } catch (error) {
         console.error('Error al cargar perfil:', error);
-        mostrarPerfilForm();
+
+        // Si hay error de red, intentar usar el perfil guardado localmente
+        const perfilLocal = localStorage.getItem('aquify_perfil');
+        if (perfilLocal) {
+            currentUser = JSON.parse(perfilLocal);
+            console.log('⚠️ Usando perfil local (sin conexión al servidor)');
+            mostrarPerfilDisplay();
+        } else {
+            mostrarPerfilForm();
+        }
+    }
+}
+
+async function sincronizarPerfilConServidor(perfil) {
+    try {
+        await fetch('/api/usuario', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(perfil)
+        });
+        console.log('✓ Perfil sincronizado con servidor');
+    } catch (error) {
+        console.log('⚠️ No se pudo sincronizar con servidor (modo offline)');
     }
 }
 
@@ -206,6 +248,11 @@ async function guardarPerfil() {
     }
 
     try {
+        // Guardar primero en localStorage (inmediato)
+        localStorage.setItem('aquify_perfil', JSON.stringify(perfil));
+        console.log('✓ Perfil guardado en dispositivo');
+
+        // Luego intentar guardar en el servidor
         const response = await fetch('/api/usuario', {
             method: 'POST',
             headers: {
@@ -218,14 +265,29 @@ async function guardarPerfil() {
         const data = await response.json();
 
         if (data.success) {
-            showAlert('✓ Perfil guardado exitosamente', 'success');
+            showAlert('✓ Perfil guardado exitosamente (dispositivo + servidor)', 'success');
             await cargarPerfil();
         } else {
-            showAlert('Error al guardar perfil', 'error');
+            // Aunque falle el servidor, ya está guardado localmente
+            showAlert('✓ Perfil guardado en dispositivo (servidor no disponible)', 'success');
+            currentUser = perfil;
+            mostrarPerfilDisplay();
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('Error al guardar perfil', 'error');
+        // El perfil ya está guardado en localStorage, así que aún funciona
+        showAlert('✓ Perfil guardado en dispositivo (modo offline)', 'success');
+        currentUser = perfil;
+        mostrarPerfilDisplay();
+    }
+}
+
+function limpiarPerfilLocal() {
+    if (confirm('¿Estás seguro de borrar tu perfil de este dispositivo? Tendrás que crearlo nuevamente.')) {
+        localStorage.removeItem('aquify_perfil');
+        currentUser = null;
+        showAlert('Perfil eliminado del dispositivo', 'success');
+        mostrarPerfilForm();
     }
 }
 
