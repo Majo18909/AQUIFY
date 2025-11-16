@@ -1,0 +1,32 @@
+# Archivos locales
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Archivos de datos locales (Vercel usará su propio almacenamiento)
+datos/
+musica/
+
+# Archivos de desarrollo
+demo.py
+*.md
+!README.md
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Archivos de Render (no necesarios para Vercel)
+Procfile
+Dockerfile
+app.yaml

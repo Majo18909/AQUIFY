@@ -24,10 +24,22 @@ CORS(app, supports_credentials=True)
 # Clave secreta para sesiones
 app.secret_key = secrets.token_hex(32)
 
-# Configuración
+# Configuración - Detectar si estamos en Vercel
+IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
+
+if IS_VERCEL:
+    # En Vercel, usar almacenamiento temporal
+    import tempfile
+    tmp_dir = tempfile.gettempdir()
+    app.config['UPLOAD_FOLDER'] = os.path.join(tmp_dir, 'aquify_musica')
+    app.config['DATOS_FOLDER'] = os.path.join(tmp_dir, 'aquify_datos')
+else:
+    # En local, usar carpetas normales
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'musica')
+    app.config['DATOS_FOLDER'] = os.path.join(os.getcwd(), 'datos')
+
+# Configuración general
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
-app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'musica')
-app.config['DATOS_FOLDER'] = os.path.join(os.getcwd(), 'datos')
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
 
 # Asegurar que existen los directorios
