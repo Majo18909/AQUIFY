@@ -71,10 +71,16 @@ def cargar_json(archivo, default=None):
 def guardar_json(archivo, datos):
     """Guarda datos en un archivo JSON"""
     try:
+        # Asegurar que el directorio existe
+        directorio = os.path.dirname(archivo)
+        if directorio and not os.path.exists(directorio):
+            os.makedirs(directorio, exist_ok=True)
+        
         with open(archivo, 'w', encoding='utf-8') as f:
             json.dump(datos, f, ensure_ascii=False, indent=2)
         return True
-    except:
+    except Exception as e:
+        print(f"Error al guardar JSON {archivo}: {str(e)}")
         return False
 
 # Datos de rutinas por tipo de piel
