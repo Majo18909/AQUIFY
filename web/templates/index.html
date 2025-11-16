@@ -99,12 +99,23 @@
         <div id="tab-musica" class="tab-content">
             <h2>🎵 Gestión de Música</h2>
 
-            <div class="card">
+            <div class="card" id="vercel-warning"
+                style="display: none; background: #fff3cd; border-left: 4px solid #ffc107;">
+                <h3 style="color: #856404;">⚠️ Limitación en Vercel</h3>
+                <p style="color: #856404;">La subida de archivos de música está deshabilitada en la versión de Vercel
+                    debido a limitaciones de almacenamiento temporal. Para usar esta función:</p>
+                <ul style="color: #856404;">
+                    <li>Ejecuta la app localmente (localhost)</li>
+                    <li>O despliega en Render.com con almacenamiento persistente</li>
+                </ul>
+            </div>
+
+            <div class="card" id="upload-card">
                 <h3>Subir Canción</h3>
                 <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
                     <p style="font-size: 3rem; margin-bottom: 1rem;">📁</p>
                     <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">Haz clic o arrastra archivos aquí</p>
-                    <p style="color: #666;">Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 50MB)</p>
+                    <p style="color: #666;" id="upload-info">Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 50MB)</p>
                     <input type="file" id="file-input" accept=".mp3,.wav,.ogg,.flac,.m4a" style="display: none;"
                         onchange="subirCancion()">
                 </div>

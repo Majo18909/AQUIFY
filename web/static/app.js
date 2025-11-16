@@ -5,12 +5,25 @@ let audioPlayer = null;
 let timerInterval = null;
 let timerSeconds = 0;
 let rutinaSeconds = 0;
+let isVercel = window.location.hostname.includes('vercel.app');
 
 // ============ INICIALIZACIÓN ============
 
 document.addEventListener('DOMContentLoaded', function () {
     cargarPerfil();
     cargarCanciones();
+
+    // Mostrar aviso si estamos en Vercel
+    if (isVercel) {
+        const warning = document.getElementById('vercel-warning');
+        if (warning) {
+            warning.style.display = 'block';
+        }
+        const uploadInfo = document.getElementById('upload-info');
+        if (uploadInfo) {
+            uploadInfo.textContent = 'Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 4MB en Vercel)';
+        }
+    }
 
     // Setup drag and drop para archivos
     const uploadArea = document.getElementById('upload-area');
@@ -269,15 +282,16 @@ async function subirCancion() {
         return;
     }
 
-    // Verificar tamaño (50MB máximo)
-    const maxSize = 50 * 1024 * 1024;
+    // Límites diferentes para Vercel vs Local
+    const maxSize = isVercel ? 4 * 1024 * 1024 : 50 * 1024 * 1024; // 4MB en Vercel, 50MB en local
+    const maxSizeMB = isVercel ? '4MB' : '50MB';
+
     if (file.size > maxSize) {
-        showAlert('El archivo es demasiado grande (máximo 50MB)', 'error');
+        showAlert(`El archivo es demasiado grande (máximo ${maxSizeMB})`, 'error');
         return;
     }
 
     // Verificar tipo de archivo
-    const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/x-m4a'];
     const fileExtension = file.name.split('.').pop().toLowerCase();
     const allowedExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
 
@@ -290,15 +304,20 @@ async function subirCancion() {
     formData.append('archivo', file);
 
     try {
-        console.log('Subiendo archivo:', file.name, 'Tamaño:', file.size, 'bytes');
+        console.log('Subiendo archivo:', file.name, 'Tamaño:', file.size, 'bytes', 'En Vercel:', isVercel);
         showAlert('Subiendo canción...', 'info');
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos timeout
 
         const response = await fetch('/api/canciones/subir', {
             method: 'POST',
             credentials: 'include',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
         console.log('Respuesta recibida:', response.status);
 
         const data = await response.json();
@@ -313,7 +332,11 @@ async function subirCancion() {
         }
     } catch (error) {
         console.error('Error completo:', error);
-        showAlert('Error al subir canción: ' + error.message, 'error');
+        if (error.name === 'AbortError') {
+            showAlert('Timeout: El archivo es muy grande o la conexión es lenta', 'error');
+        } else {
+            showAlert('Error al subir canción: ' + error.message, 'error');
+        }
     }
 }
 
