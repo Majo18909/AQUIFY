@@ -64,7 +64,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(32, 84, 98, 0.5);
+    background: rgba(32, 84, 98, 0.15);
     pointer-events: none;
 }
 
