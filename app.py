@@ -9,7 +9,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 import secrets
 import re
@@ -22,6 +22,9 @@ app = Flask(__name__,
 
 # Clave secreta para sesiones - usar variable de entorno en producción o generar una fija
 app.secret_key = os.environ.get('SECRET_KEY', 'aquify-secret-key-2024-vercel-deployment')
+
+# Configurar sesiones permanentes (duran 30 días)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
 # Configuración - Detectar si estamos en Vercel
 IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
@@ -56,8 +59,18 @@ os.makedirs(app.config['DATOS_FOLDER'], exist_ok=True)
 
 def get_user_id():
     """Obtiene o crea un ID único para cada usuario"""
+    # Primero intentar obtener de la sesión
     if 'user_id' not in session:
-        session['user_id'] = secrets.token_hex(16)
+        # Intentar obtener del header enviado por el cliente
+        user_id_header = request.headers.get('X-User-ID')
+        if user_id_header:
+            session['user_id'] = user_id_header
+        else:
+            # Generar un nuevo ID solo si no existe
+            session['user_id'] = secrets.token_hex(16)
+    
+    # Hacer la sesión permanente para que dure más tiempo
+    session.permanent = True
     return session['user_id']
 
 def get_user_file(filename):

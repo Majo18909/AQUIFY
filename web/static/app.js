@@ -6,10 +6,40 @@ let timerInterval = null;
 let timerSeconds = 0;
 let rutinaSeconds = 0;
 let isVercel = window.location.hostname.includes('vercel.app');
+let deviceUserId = null;
+
+// ============ FUNCIONES DE USUARIO ============
+
+function getDeviceUserId() {
+    // Obtiene o crea un ID único para este dispositivo
+    if (!deviceUserId) {
+        deviceUserId = localStorage.getItem('aquify_device_id');
+        if (!deviceUserId) {
+            // Generar un ID único para este dispositivo
+            deviceUserId = 'device_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            localStorage.setItem('aquify_device_id', deviceUserId);
+            console.log('✓ Nuevo ID de dispositivo creado:', deviceUserId);
+        } else {
+            console.log('✓ ID de dispositivo recuperado:', deviceUserId);
+        }
+    }
+    return deviceUserId;
+}
+
+function getFetchHeaders(additionalHeaders = {}) {
+    // Devuelve headers estándar con el ID de dispositivo
+    return {
+        'X-User-ID': getDeviceUserId(),
+        ...additionalHeaders
+    };
+}
 
 // ============ INICIALIZACIÓN ============
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Inicializar ID de dispositivo
+    getDeviceUserId();
+
     cargarPerfil();
     cargarCanciones();
 
@@ -104,7 +134,8 @@ async function cargarPerfil() {
 
         // Si no hay perfil local, intentar cargar desde el servidor
         const response = await fetch('/api/usuario', {
-            credentials: 'include'
+            credentials: 'include',
+            headers: getFetchHeaders()
         });
         const data = await response.json();
 
@@ -136,9 +167,9 @@ async function sincronizarPerfilConServidor(perfil) {
     try {
         await fetch('/api/usuario', {
             method: 'POST',
-            headers: {
+            headers: getFetchHeaders({
                 'Content-Type': 'application/json'
-            },
+            }),
             credentials: 'include',
             body: JSON.stringify(perfil)
         });
@@ -255,9 +286,9 @@ async function guardarPerfil() {
         // Luego intentar guardar en el servidor
         const response = await fetch('/api/usuario', {
             method: 'POST',
-            headers: {
+            headers: getFetchHeaders({
                 'Content-Type': 'application/json'
-            },
+            }),
             credentials: 'include',
             body: JSON.stringify(perfil)
         });
@@ -313,20 +344,27 @@ async function cargarCanciones() {
 
         if (cancionesLocales) {
             playlist = JSON.parse(cancionesLocales);
-            console.log('✓ Canciones cargadas desde dispositivo');
+            console.log('✓ Canciones cargadas desde dispositivo:', playlist.length, 'canciones');
             mostrarCanciones();
         }
 
         // Luego intentar sincronizar con el servidor
         const response = await fetch('/api/canciones', {
-            credentials: 'include'
+            credentials: 'include',
+            headers: getFetchHeaders()
         });
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success && data.canciones && data.canciones.length > 0) {
+            // Solo actualizar si el servidor tiene canciones
             playlist = data.canciones;
             // Guardar en localStorage
             localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
+            console.log('✓ Canciones sincronizadas con servidor:', playlist.length, 'canciones');
+            mostrarCanciones();
+        } else if (playlist.length === 0) {
+            // Si no hay canciones ni en servidor ni en localStorage
+            console.log('ℹ No hay canciones guardadas');
             mostrarCanciones();
         }
     } catch (error) {
@@ -415,6 +453,7 @@ async function subirCancion() {
         const response = await fetch('/api/canciones/subir', {
             method: 'POST',
             credentials: 'include',
+            headers: getFetchHeaders(),
             body: formData,
             signal: controller.signal
         });
@@ -459,7 +498,8 @@ async function eliminarCancion(id) {
     try {
         const response = await fetch(`/api/canciones/${id}`, {
             method: 'DELETE',
-            credentials: 'include'
+            credentials: 'include',
+            headers: getFetchHeaders()
         }); const data = await response.json();
 
         if (data.success) {
