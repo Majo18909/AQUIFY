@@ -360,8 +360,12 @@ def subir_cancion():
             playlist = cargar_json(playlist_file, [])
             print(f"Playlist actual tiene {len(playlist)} canciones")
             
+            # Generar ID único basado en timestamp
+            import time
+            nuevo_id = int(time.time() * 1000)  # timestamp en milisegundos
+            
             cancion = {
-                'id': len(playlist) + 1,
+                'id': nuevo_id,
                 'nombre': Path(filename).stem,
                 'archivo': filename,
                 'ruta': filepath,
@@ -393,24 +397,43 @@ def subir_cancion():
 @app.route('/api/canciones/<int:id>', methods=['DELETE'])
 def eliminar_cancion(id):
     """Elimina una canción"""
-    playlist_file = get_user_file('playlist.json')
-    playlist = cargar_json(playlist_file, [])
-    
-    cancion_encontrada = None
-    for i, cancion in enumerate(playlist):
-        if cancion.get('id') == id:
-            cancion_encontrada = playlist.pop(i)
-            break
-    
-    if cancion_encontrada:
-        # Eliminar archivo
-        if os.path.exists(cancion_encontrada['ruta']):
-            os.remove(cancion_encontrada['ruta'])
+    try:
+        playlist_file = get_user_file('playlist.json')
+        playlist = cargar_json(playlist_file, [])
         
-        guardar_json(playlist_file, playlist)
-        return jsonify({'success': True, 'message': 'Canción eliminada'})
+        cancion_encontrada = None
+        indice_encontrado = -1
+        
+        for i, cancion in enumerate(playlist):
+            if cancion.get('id') == id:
+                cancion_encontrada = cancion
+                indice_encontrado = i
+                break
+        
+        if cancion_encontrada:
+            # Eliminar de la lista
+            playlist.pop(indice_encontrado)
+            
+            # Eliminar archivo físico si existe
+            ruta_archivo = cancion_encontrada.get('ruta')
+            if ruta_archivo and os.path.exists(ruta_archivo):
+                try:
+                    os.remove(ruta_archivo)
+                    print(f"✓ Archivo eliminado: {ruta_archivo}")
+                except Exception as e:
+                    print(f"⚠ No se pudo eliminar el archivo: {e}")
+            
+            # Guardar playlist actualizada
+            guardar_json(playlist_file, playlist)
+            return jsonify({'success': True, 'message': 'Canción eliminada exitosamente'})
+        
+        return jsonify({'success': False, 'message': 'Canción no encontrada'})
     
-    return jsonify({'success': False, 'message': 'Canción no encontrada'})
+    except Exception as e:
+        print(f"Error al eliminar canción: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Error del servidor: {str(e)}'})
 
 @app.route('/musica/<filename>')
 def servir_musica(filename):

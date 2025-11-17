@@ -571,19 +571,23 @@ async function eliminarCancion(id) {
             method: 'DELETE',
             credentials: 'include',
             headers: getFetchHeaders()
-        }); const data = await response.json();
+        });
+
+        const data = await response.json();
 
         if (data.success) {
             showAlert('✓ Canción eliminada', 'success');
             await cargarCanciones();
-            // Actualizar localStorage
+            // Actualizar localStorage después de recargar
             localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
+            // Actualizar selector del reproductor
+            cargarCancionesEnSelector();
         } else {
-            showAlert('Error al eliminar canción', 'error');
+            showAlert('Error al eliminar canción: ' + (data.message || 'Error desconocido'), 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showAlert('Error al eliminar canción', 'error');
+        showAlert('Error al eliminar canción: ' + error.message, 'error');
     }
 }
 
