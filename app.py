@@ -698,6 +698,96 @@ CANCIONES_POR_ARTISTA = {
             'That\'s What I Like'
         ],
         'genero': 'Pop/R&B/Funk'
+    },
+    'rex orange county': {
+        'nombre': 'Rex Orange County',
+        'canciones_relajantes': [
+            'Loving Is Easy',
+            'Best Friend',
+            'Pluto Projector',
+            'Always',
+            'Sunflower'
+        ],
+        'canciones_energizantes': [
+            'THE SHADE',
+            'AMAZING',
+            'KEEP IT UP',
+            '10/10',
+            'Uno'
+        ],
+        'genero': 'Indie Pop/Soul'
+    },
+    'conan gray': {
+        'nombre': 'Conan Gray',
+        'canciones_relajantes': [
+            'Heather',
+            'Astronomy',
+            'Memories',
+            'Comfort Crowd',
+            'People Watching'
+        ],
+        'canciones_energizantes': [
+            'Maniac',
+            'Checkmate',
+            'Overdrive',
+            'Jigsaw',
+            'The Story'
+        ],
+        'genero': 'Pop/Indie Pop'
+    },
+    'clairo': {
+        'nombre': 'Clairo',
+        'canciones_relajantes': [
+            'Sofia',
+            'Bags',
+            'Pretty Girl',
+            'Amoeba',
+            'Juna'
+        ],
+        'canciones_energizantes': [
+            'Sexy to Someone',
+            'Nomad',
+            'Bubble Gum',
+            'Closer to You',
+            'North'
+        ],
+        'genero': 'Indie Pop/Bedroom Pop'
+    },
+    'keshi': {
+        'nombre': 'Keshi',
+        'canciones_relajantes': [
+            'understand',
+            'LIMBO',
+            'like i need u',
+            'drunk',
+            'beside you'
+        ],
+        'canciones_energizantes': [
+            'SOMEBODY',
+            'TOUCH',
+            'GET IT',
+            'ANGEL',
+            'Say'
+        ],
+        'genero': 'R&B/Indie Pop'
+    },
+    'jvke': {
+        'nombre': 'JVKE',
+        'canciones_relajantes': [
+            'golden hour',
+            'this is what falling in love feels like',
+            'her',
+            'upside down',
+            'catching feelings'
+        ],
+        'canciones_energizantes': [
+            'this is what heartbreak feels like',
+            'this is what sadness feels like',
+            'this is what losing someone feels like',
+            'moon and back',
+            'ghost'
+        ],
+        'genero': 'Pop/Indie Pop'
     }
 }
 
@@ -939,7 +1029,8 @@ No tengo recomendaciones específicas de este artista en mi base de datos, pero 
 **Artistas similares que tengo:**
 • Sabrina Carpenter • Billie Eilish • Taylor Swift
 • Olivia Rodrigo • Ariana Grande • The Weeknd
-• Harry Styles • SZA • Lana Del Rey
+• Harry Styles • SZA • Lana Del Rey • Gracie Abrams
+• Rex Orange County • Conan Gray • Clairo • Keshi • JVKE
 
 ¿Quieres que te sugiera canciones de alguno de estos?'''
         
@@ -958,9 +1049,10 @@ No tengo recomendaciones específicas de este artista en mi base de datos, pero 
 • 🎵 Olivia Rodrigo • Ariana Grande • Gracie Abrams
 • 🎸 Harry Styles • The Weeknd • Lana Del Rey
 • 🎹 SZA • Bad Bunny • Bruno Mars
+• 🎧 Rex Orange County • Conan Gray • Clairo • Keshi • JVKE
 
 💡 **Pregúntame:** "Canciones de [artista] para mi ducha" 
-**Ejemplo:** "Sugiéreme canciones de Sabrina Carpenter"
+**Ejemplo:** "Sugiéreme canciones de Sabrina Carpenter" o "Música de Clairo"
 
 ¿Buscas canciones de algún artista en particular?'''
         
