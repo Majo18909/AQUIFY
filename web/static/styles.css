@@ -48,66 +48,22 @@ body {
     background: #2B5F6F;
     text-align: center;
     box-shadow: 0 4px 6px var(--sombra);
-    padding: 2.5rem 1rem;
+    padding: 2rem 0;
     overflow: hidden;
 }
 
-.logo-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.logo-gota-svg {
-    width: 60px;
-    height: 70px;
-    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.logo-text {
-    font-size: 4.5rem;
-    font-weight: 900;
-    margin: 0;
-    color: white;
-    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-    letter-spacing: 0.3rem;
-    font-family: 'Fredoka One', 'Baloo 2', 'Righteous', 'Comic Sans MS', cursive, sans-serif;
-}
-
-.logo-wave-svg {
-    width: 100px;
-    height: 50px;
-    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.logo-subtitle {
-    font-size: 1.3rem;
-    font-weight: 600;
-    letter-spacing: 0.5rem;
-    margin: 0;
-    color: white;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+.header-logo {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .logo-text {
-        font-size: 3rem;
-        letter-spacing: 0.2rem;
-    }
-    .logo-gota-svg {
-        width: 40px;
-        height: 50px;
-    }
-    .logo-wave-svg {
-        width: 70px;
-        height: 35px;
-    }
-    .logo-subtitle {
-        font-size: 1rem;
-        letter-spacing: 0.3rem;
+    .header-logo {
+        max-width: 90%;
     }
 }
 
