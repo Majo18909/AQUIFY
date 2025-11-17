@@ -3,37 +3,24 @@
     "short_name": "AQUIFY",
     "description": "Tu compañero musical para el baño. Cuida el agua mientras disfrutas tu música favorita.",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#205462",
     "theme_color": "#205462",
     "orientation": "portrait",
+    "lang": "es-MX",
+    "dir": "ltr",
     "icons": [
         {
-            "src": "/static/img/icon-192.png",
-            "sizes": "192x192",
+            "src": "/static/img/aquify-header.png",
+            "sizes": "any",
             "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/static/img/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         }
     ],
     "categories": [
         "music",
         "lifestyle",
         "utilities"
-    ],
-    "screenshots": [],
-    "share_target": {
-        "action": "/",
-        "method": "GET",
-        "params": {
-            "title": "title",
-            "text": "text",
-            "url": "url"
-        }
-    }
+    ]
 }
