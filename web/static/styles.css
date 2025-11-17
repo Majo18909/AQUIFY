@@ -676,3 +676,134 @@ body {
 .custom-gender.show {
     display: block;
 }
+
+/* ========== RESPONSIVE - MÓVILES ========== */
+@media (max-width: 768px) {
+    /* Header más compacto */
+    .header {
+        padding: 1rem 0;
+    }
+    
+    .header-logo {
+        max-width: 250px;
+    }
+    
+    /* Container con menos padding */
+    .container {
+        padding: 0 0.5rem;
+        margin: 1rem auto;
+    }
+    
+    /* Tabs en una columna en móviles pequeños */
+    .tabs {
+        gap: 0.3rem;
+    }
+    
+    .tab-button {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+        flex: 1 1 calc(50% - 0.3rem);
+    }
+    
+    /* Cards más compactas */
+    .card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .card h3 {
+        font-size: 1.1rem;
+    }
+    
+    /* Chatbot responsive */
+    .chat-container {
+        height: calc(100vh - 350px);
+        min-height: 400px;
+    }
+    
+    .chat-messages {
+        padding: 1rem;
+        gap: 0.8rem;
+    }
+    
+    .chat-message {
+        max-width: 90%;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .chat-input-container {
+        padding: 0.8rem;
+        gap: 0.4rem;
+    }
+    
+    .chat-input {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.95rem;
+    }
+    
+    /* Formularios más compactos */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 0.6rem;
+        font-size: 0.95rem;
+    }
+    
+    /* Botones más pequeños */
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+    
+    /* Lista de canciones responsive */
+    .song-item {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .song-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    /* Reproductor compacto */
+    .player {
+        padding: 1rem;
+    }
+    
+    .timer-display {
+        font-size: 2.5rem;
+    }
+    
+    /* Alertas responsive */
+    #alert-container {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Móviles muy pequeños */
+    .header-logo {
+        max-width: 200px;
+    }
+    
+    .tab-button {
+        padding: 0.7rem 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .chat-container {
+        height: calc(100vh - 300px);
+    }
+    
+    .chat-message {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.9rem;
+    }
+}
