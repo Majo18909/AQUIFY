@@ -410,39 +410,43 @@ function limpiarCancionesLocales() {
 
 async function cargarCanciones() {
     try {
-        // Primero intentar cargar desde localStorage
-        const cancionesLocales = localStorage.getItem('aquify_canciones');
-
-        if (cancionesLocales) {
-            playlist = JSON.parse(cancionesLocales);
-            console.log('✓ Canciones cargadas desde dispositivo:', playlist.length, 'canciones');
-            mostrarCanciones();
-        }
-
-        // Luego intentar sincronizar con el servidor
+        // Siempre intentar cargar desde el servidor primero
         const response = await fetch('/api/canciones', {
             credentials: 'include',
             headers: getFetchHeaders()
         });
         const data = await response.json();
 
-        if (data.success && data.canciones && data.canciones.length > 0) {
-            // Solo actualizar si el servidor tiene canciones
-            playlist = data.canciones;
-            // Guardar en localStorage
+        if (data.success) {
+            playlist = data.canciones || [];
+            // Actualizar localStorage con los datos del servidor
             localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
             console.log('✓ Canciones sincronizadas con servidor:', playlist.length, 'canciones');
             mostrarCanciones();
-        } else if (playlist.length === 0) {
-            // Si no hay canciones ni en servidor ni en localStorage
-            console.log('ℹ No hay canciones guardadas');
-            mostrarCanciones();
+        } else {
+            // Si falla el servidor, cargar desde localStorage
+            const cancionesLocales = localStorage.getItem('aquify_canciones');
+            if (cancionesLocales) {
+                playlist = JSON.parse(cancionesLocales);
+                console.log('✓ Canciones cargadas desde dispositivo (modo offline):', playlist.length, 'canciones');
+                mostrarCanciones();
+            } else {
+                console.log('ℹ No hay canciones guardadas');
+                playlist = [];
+                mostrarCanciones();
+            }
         }
     } catch (error) {
         console.error('Error al cargar canciones:', error);
-        // Si ya teníamos canciones locales, seguimos con esas
-        if (playlist.length > 0) {
-            console.log('✓ Usando canciones guardadas localmente (modo offline)');
+        // Si hay error de red, usar localStorage
+        const cancionesLocales = localStorage.getItem('aquify_canciones');
+        if (cancionesLocales) {
+            playlist = JSON.parse(cancionesLocales);
+            console.log('✓ Usando canciones guardadas localmente (modo offline):', playlist.length, 'canciones');
+            mostrarCanciones();
+        } else {
+            console.log('ℹ No hay canciones guardadas');
+            playlist = [];
             mostrarCanciones();
         }
     }
@@ -581,9 +585,8 @@ async function eliminarCancion(id) {
 
         if (data.success) {
             showAlert('✓ Canción eliminada', 'success');
+            // Recargar canciones desde el servidor (esto actualiza localStorage automáticamente)
             await cargarCanciones();
-            // Actualizar localStorage después de recargar
-            localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
             // Actualizar selector del reproductor
             cargarCancionesEnSelector();
         } else {
