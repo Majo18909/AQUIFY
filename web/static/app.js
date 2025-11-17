@@ -476,8 +476,8 @@ function mostrarCanciones() {
                 </div>
             </div>
             <div class="song-actions">
-                <button class="btn btn-secondary" onclick="reproducirCancion(${song.id})">▶️ Reproducir</button>
-                <button class="btn btn-danger" onclick="eliminarCancion(${song.id})">🗑️</button>
+                <button class="btn btn-secondary" onclick="reproducirCancion('${song.id}')">▶️ Reproducir</button>
+                <button class="btn btn-danger" onclick="eliminarCancion('${song.id}')">🗑️</button>
             </div>
         </li>
     `).join('');
@@ -566,8 +566,12 @@ async function eliminarCancion(id) {
         return;
     }
 
+    // Convertir ID a número (puede ser string desde el onclick)
+    const songId = parseInt(id);
+    console.log('Eliminando canción con ID:', songId);
+
     try {
-        const response = await fetch(`/api/canciones/${id}`, {
+        const response = await fetch(`/api/canciones/${songId}`, {
             method: 'DELETE',
             credentials: 'include',
             headers: getFetchHeaders()
@@ -916,7 +920,9 @@ function detenerReproduccion() {
 }
 
 function reproducirCancion(id) {
-    document.getElementById('cancion-seleccionada').value = id;
+    // Convertir a número si viene como string
+    const songId = typeof id === 'string' ? id : String(id);
+    document.getElementById('cancion-seleccionada').value = songId;
     switchTab('reproductor');
 
     // Esperar a que el tab cambie
