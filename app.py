@@ -32,11 +32,11 @@ if IS_VERCEL:
     tmp_dir = tempfile.gettempdir()
     app.config['UPLOAD_FOLDER'] = os.path.join(tmp_dir, 'aquify_musica')
     app.config['DATOS_FOLDER'] = os.path.join(tmp_dir, 'aquify_datos')
-    app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max en Vercel para evitar timeouts
+    app.config['MAX_CONTENT_LENGTH'] = 4 * 1024 * 1024  # 4MB max en Vercel (límite de payload)
     # Usar cookies más persistentes en Vercel
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_SECURE'] = True
-    print("🚀 Ejecutando en VERCEL - Límite de archivos: 5MB, almacenamiento temporal")
+    print("🚀 Ejecutando en VERCEL - Límite de archivos: 4MB (límite de Vercel), almacenamiento temporal")
 else:
     # En local, usar carpetas normales
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'musica')

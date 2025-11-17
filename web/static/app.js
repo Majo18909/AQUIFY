@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const uploadInfo = document.getElementById('upload-info');
         if (uploadInfo) {
-            uploadInfo.textContent = 'Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 5MB en Vercel - Almacenamiento temporal)';
+            uploadInfo.textContent = 'Formatos: MP3, WAV, OGG, FLAC, M4A (Máx. 4MB en Vercel - Almacenamiento temporal)';
         }
     }
 
@@ -345,8 +345,9 @@ async function subirCancion() {
     }
 
     // Límites diferentes para Vercel vs Local
-    const maxSize = isVercel ? 5 * 1024 * 1024 : 50 * 1024 * 1024; // 5MB en Vercel, 50MB en local
-    const maxSizeMB = isVercel ? '5MB' : '50MB';
+    // Vercel tiene límite de payload de 4.5MB, usamos 4MB para estar seguros
+    const maxSize = isVercel ? 4 * 1024 * 1024 : 50 * 1024 * 1024; // 4MB en Vercel, 50MB en local
+    const maxSizeMB = isVercel ? '4MB' : '50MB';
 
     if (file.size > maxSize) {
         showAlert(`El archivo es demasiado grande (máximo ${maxSizeMB})`, 'error');
@@ -381,6 +382,13 @@ async function subirCancion() {
 
         clearTimeout(timeoutId);
         console.log('Respuesta recibida:', response.status);
+
+        // Manejar error 413 (Payload Too Large)
+        if (response.status === 413) {
+            showAlert(`El archivo es muy grande para Vercel. Máximo ${maxSizeMB}. Usa localhost para archivos más grandes.`, 'error');
+            fileInput.value = '';
+            return;
+        }
 
         const data = await response.json();
         console.log('Datos:', data);
