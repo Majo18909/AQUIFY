@@ -481,6 +481,226 @@ MUSICA_POR_RUTINA = {
     'larga': ['Playlists ambient', 'Música instrumental', 'Soundtracks']
 }
 
+# Canciones recomendadas por artista (para ducha/rutinas)
+CANCIONES_POR_ARTISTA = {
+    'sabrina carpenter': {
+        'nombre': 'Sabrina Carpenter',
+        'canciones_relajantes': [
+            'Skin',
+            'Vicious',
+            'exhale',
+            'decode',
+            'opposite'
+        ],
+        'canciones_energizantes': [
+            'Espresso',
+            'Feather',
+            'Nonsense',
+            'Fast Times',
+            'because i liked a boy'
+        ],
+        'genero': 'Pop'
+    },
+    'billie eilish': {
+        'nombre': 'Billie Eilish',
+        'canciones_relajantes': [
+            'when the party\'s over',
+            'idontwannabeyouanymore',
+            'ocean eyes',
+            'lovely',
+            'What Was I Made For?'
+        ],
+        'canciones_energizantes': [
+            'bad guy',
+            'Therefore I Am',
+            'you should see me in a crown',
+            'Happier Than Ever',
+            'LUNCH'
+        ],
+        'genero': 'Alt-Pop'
+    },
+    'taylor swift': {
+        'nombre': 'Taylor Swift',
+        'canciones_relajantes': [
+            'Lover',
+            'Cardigan',
+            'Champagne Problems',
+            'Snow On The Beach',
+            'Sweet Nothing'
+        ],
+        'canciones_energizantes': [
+            'Shake It Off',
+            'Anti-Hero',
+            'Cruel Summer',
+            'ME!',
+            'Look What You Made Me Do'
+        ],
+        'genero': 'Pop'
+    },
+    'olivia rodrigo': {
+        'nombre': 'Olivia Rodrigo',
+        'canciones_relajantes': [
+            'drivers license',
+            'traitor',
+            'happier',
+            'logical',
+            'making the bed'
+        ],
+        'canciones_energizantes': [
+            'good 4 u',
+            'brutal',
+            'deja vu',
+            'bad idea right?',
+            'get him back!'
+        ],
+        'genero': 'Pop Rock'
+    },
+    'ariana grande': {
+        'nombre': 'Ariana Grande',
+        'canciones_relajantes': [
+            'breathin',
+            'just like magic',
+            'ghostin',
+            'R.E.M',
+            'moonlight'
+        ],
+        'canciones_energizantes': [
+            '7 rings',
+            'thank u, next',
+            'positions',
+            'yes, and?',
+            'Side To Side'
+        ],
+        'genero': 'Pop/R&B'
+    },
+    'gracie abrams': {
+        'nombre': 'Gracie Abrams',
+        'canciones_relajantes': [
+            'I miss you, I\'m sorry',
+            'Where do we go now?',
+            'Difficult',
+            'The blue',
+            'Block me out'
+        ],
+        'canciones_energizantes': [
+            'Risk',
+            'Close To You',
+            'That\'s So True',
+            'I Love You, I\'m Sorry',
+            'Feel Like Shit'
+        ],
+        'genero': 'Indie Pop'
+    },
+    'lana del rey': {
+        'nombre': 'Lana Del Rey',
+        'canciones_relajantes': [
+            'Video Games',
+            'Young and Beautiful',
+            'Summertime Sadness',
+            'Love',
+            'hope is a dangerous thing'
+        ],
+        'canciones_energizantes': [
+            'Born To Die',
+            'Ride',
+            'West Coast',
+            'High By The Beach',
+            'A&W'
+        ],
+        'genero': 'Alt-Pop/Indie'
+    },
+    'the weeknd': {
+        'nombre': 'The Weeknd',
+        'canciones_relajantes': [
+            'Die For You',
+            'Earned It',
+            'Call Out My Name',
+            'Wicked Games',
+            'Save Your Tears'
+        ],
+        'canciones_energizantes': [
+            'Blinding Lights',
+            'Starboy',
+            'Can\'t Feel My Face',
+            'The Hills',
+            'Popular'
+        ],
+        'genero': 'R&B/Pop'
+    },
+    'bad bunny': {
+        'nombre': 'Bad Bunny',
+        'canciones_relajantes': [
+            'Callaíta',
+            'La Noche de Anoche',
+            'Neverita',
+            'Un x100to',
+            'Andrea'
+        ],
+        'canciones_energizantes': [
+            'Tití Me Preguntó',
+            'Moscow Mule',
+            'Yo Perreo Sola',
+            'Dakiti',
+            'MONACO'
+        ],
+        'genero': 'Reggaetón/Urbano'
+    },
+    'sza': {
+        'nombre': 'SZA',
+        'canciones_relajantes': [
+            'The Weekend',
+            'Good Days',
+            'Drew Barrymore',
+            'Snooze',
+            'Special'
+        ],
+        'canciones_energizantes': [
+            'Kill Bill',
+            'I Hate U',
+            'All The Stars',
+            'Shirt',
+            'Low'
+        ],
+        'genero': 'R&B/Soul'
+    },
+    'harry styles': {
+        'nombre': 'Harry Styles',
+        'canciones_relajantes': [
+            'Falling',
+            'Matilda',
+            'Fine Line',
+            'Cherry',
+            'Little Freak'
+        ],
+        'canciones_energizantes': [
+            'As It Was',
+            'Watermelon Sugar',
+            'Adore You',
+            'Late Night Talking',
+            'Music For a Sushi Restaurant'
+        ],
+        'genero': 'Pop Rock'
+    },
+    'bruno mars': {
+        'nombre': 'Bruno Mars',
+        'canciones_relajantes': [
+            'When I Was Your Man',
+            'Talking to the Moon',
+            'It Will Rain',
+            'Versace on the Floor',
+            'Leave The Door Open'
+        ],
+        'canciones_energizantes': [
+            'Uptown Funk',
+            '24K Magic',
+            'Treasure',
+            'Locked Out Of Heaven',
+            'That\'s What I Like'
+        ],
+        'genero': 'Pop/R&B/Funk'
+    }
+}
+
 def clasificar_intencion(mensaje):
     """Clasifica la intención del usuario"""
     mensaje = mensaje.lower().strip()
@@ -521,19 +741,33 @@ def clasificar_intencion(mensaje):
 
 def extraer_artista(mensaje):
     """Extrae el nombre del artista del mensaje"""
-    # Patrones comunes
+    mensaje = mensaje.lower()
+    
+    # Primero buscar coincidencias exactas en nuestro diccionario
+    for artista_key in CANCIONES_POR_ARTISTA.keys():
+        if artista_key in mensaje:
+            return artista_key
+    
+    # Patrones comunes para extraer nombre de artista
     patrones = [
-        r'canciones de (.+)',
-        r'música de (.+)',
-        r'artista (.+)',
-        r'cantante (.+)',
-        r'de (.+)',
+        r'canciones de (.+?)(?:\?|$|para|que)',
+        r'música de (.+?)(?:\?|$|para|que)',
+        r'sugiere(?:me)? canciones de (.+?)(?:\?|$|para|que)',
+        r'recomienda(?:me)? canciones de (.+?)(?:\?|$|para|que)',
+        r'artista (.+?)(?:\?|$|para|que)',
+        r'cantante (.+?)(?:\?|$|para|que)',
     ]
     
     for patron in patrones:
-        match = re.search(patron, mensaje.lower())
+        match = re.search(patron, mensaje)
         if match:
-            return match.group(1).strip()
+            artista_extraido = match.group(1).strip()
+            # Buscar coincidencia parcial en el diccionario
+            for artista_key, data in CANCIONES_POR_ARTISTA.items():
+                if artista_key in artista_extraido or artista_extraido in artista_key:
+                    return artista_key
+            return artista_extraido
+    
     return None
 
 def buscar_en_google(query):
@@ -659,16 +893,58 @@ def procesar_mensaje_chatbot():
     elif intencion == 'musica':
         artista = extraer_artista(mensaje)
         
-        if artista:
-            respuesta = f'''🎵 **Canciones de {artista.title()} perfectas para tu ducha:**
+        if artista and artista in CANCIONES_POR_ARTISTA:
+            # Tenemos canciones específicas de este artista
+            artista_info = CANCIONES_POR_ARTISTA[artista]
+            
+            # Determinar si el usuario quiere música relajante o energizante
+            es_relajante = any(palabra in mensaje for palabra in ['relaj', 'calm', 'suave', 'tranquil', 'spa'])
+            es_energizante = any(palabra in mensaje for palabra in ['energi', 'activ', 'rápid', 'upbeat', 'mover'])
+            
+            respuesta = f'''🎵 **Canciones de {artista_info["nombre"]} perfectas para tu ducha:**\n\n'''
+            
+            # Si no especificaron tipo, mostrar ambas categorías
+            if not es_relajante and not es_energizante:
+                respuesta += f'**💧 Para rutina relajante/spa (7-10 min):**\n'
+                for cancion in artista_info['canciones_relajantes']:
+                    respuesta += f'• {cancion}\n'
+                
+                respuesta += f'\n**⚡ Para rutina energizante/rápida (5-7 min):**\n'
+                for cancion in artista_info['canciones_energizantes']:
+                    respuesta += f'• {cancion}\n'
+            elif es_relajante:
+                respuesta += f'**💧 Canciones relajantes perfectas para una rutina spa:**\n'
+                for cancion in artista_info['canciones_relajantes']:
+                    respuesta += f'• {cancion}\n'
+            else:
+                respuesta += f'**⚡ Canciones energizantes para empezar el día:**\n'
+                for cancion in artista_info['canciones_energizantes']:
+                    respuesta += f'• {cancion}\n'
+            
+            respuesta += f'\n**🎸 Género:** {artista_info["genero"]}\n'
+            respuesta += f'\n💡 **Tip:** Puedes subir estas canciones en la pestaña "Música" y crear tu playlist personalizada.'
+            
+            datos_extra['artista'] = artista_info
+        
+        elif artista:
+            # Artista mencionado pero no está en nuestro diccionario
+            respuesta = f'''🎵 **Canciones de {artista.title()}:**
 
-Para encontrar canciones específicas de este artista, puedes:
-1. Ir a la pestaña "Música"
-2. Subir tus canciones favoritas de {artista.title()}
-3. Crear tu playlist personalizada
+No tengo recomendaciones específicas de este artista en mi base de datos, pero puedes:
 
-💡 **Tip:** Las canciones relajantes y a tempo medio (60-90 BPM) son ideales para ducharte.'''
+1. 🔍 **Buscar en Spotify/YouTube:** "{artista} chill songs" o "{artista} upbeat songs"
+2. 📱 **Ir a la pestaña "Música":** Sube tus canciones favoritas
+3. 🎧 **Crear tu playlist:** Personalízala para tu rutina
+
+**Artistas similares que tengo:**
+• Sabrina Carpenter • Billie Eilish • Taylor Swift
+• Olivia Rodrigo • Ariana Grande • The Weeknd
+• Harry Styles • SZA • Lana Del Rey
+
+¿Quieres que te sugiera canciones de alguno de estos?'''
+        
         else:
+            # No mencionaron artista específico
             respuesta = '''🎵 **Recomendaciones de música para tu ducha:**
 
 **Por tipo de rutina:**
@@ -677,13 +953,14 @@ Para encontrar canciones específicas de este artista, puedes:
 • **Rápida:** Indie rock, Pop rock
 • **Larga/Spa:** Playlists ambient, Instrumental
 
-**Artistas recomendados:**
-• Billie Eilish (canciones suaves)
-• Rex Orange County
-• Conan Gray
-• Clairo
-• Keshi
-• JVKE
+**Artistas disponibles con recomendaciones:**
+• 🎤 Sabrina Carpenter • Billie Eilish • Taylor Swift
+• 🎵 Olivia Rodrigo • Ariana Grande • Gracie Abrams
+• 🎸 Harry Styles • The Weeknd • Lana Del Rey
+• 🎹 SZA • Bad Bunny • Bruno Mars
+
+💡 **Pregúntame:** "Canciones de [artista] para mi ducha" 
+**Ejemplo:** "Sugiéreme canciones de Sabrina Carpenter"
 
 ¿Buscas canciones de algún artista en particular?'''
         
