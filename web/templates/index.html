@@ -11,8 +11,12 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <h1>🎵 AQUIFY 💧</h1>
-        <p>Tu Compañero Musical para el Baño</p>
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='img/aquify-logo.png') }}" alt="AQUIFY Logo" class="logo-img"
+                onerror="this.style.display='none'">
+            <h1>AQUIFY</h1>
+        </div>
+        <p>Tu Compañero Musical para el Baño 💧</p>
     </header>
 
     <!-- Container Principal -->

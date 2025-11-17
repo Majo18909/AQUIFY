@@ -2,6 +2,14 @@
 
 /* Variables de colores */
 :root {
+    /* Colores del logo AQUIFY */
+    --teal-primario: #2B5F6F;
+    --teal-oscuro: #1E4451;
+    --teal-medio: #3A7A8C;
+    --teal-claro: #5A9BAE;
+    --teal-muy-claro: #A8D5E2;
+
+    /* Colores originales - mantener para compatibilidad */
     --verde-primario: #00CC57;
     --verde-oscuro: #0A8A46;
     --verde-claro: #BFEFD6;
@@ -18,8 +26,8 @@
     --gris-claro: #FBFCFE;
     --gris-muy-claro: #F3F9FF;
 
-    --sombra: rgba(8, 74, 111, 0.1);
-    --sombra-hover: rgba(8, 74, 111, 0.2);
+    --sombra: rgba(43, 95, 111, 0.1);
+    --sombra-hover: rgba(43, 95, 111, 0.2);
 }
 
 * {
@@ -30,24 +38,40 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, var(--azul-muy-claro) 0%, var(--verde-muy-claro) 100%);
+    background: linear-gradient(135deg, var(--teal-muy-claro) 0%, var(--azul-muy-claro) 100%);
     min-height: 100vh;
-    color: var(--azul-oscuro);
+    color: var(--teal-oscuro);
 }
 
 /* Header */
 .header {
-    background: linear-gradient(135deg, var(--azul-primario) 0%, var(--verde-primario) 100%);
+    background: linear-gradient(135deg, var(--teal-primario) 0%, var(--teal-medio) 100%);
     color: white;
     padding: 2rem;
     text-align: center;
     box-shadow: 0 4px 6px var(--sombra);
+    position: relative;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.logo-img {
+    height: 60px;
+    width: auto;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .header h1 {
     font-size: 3rem;
     margin-bottom: 0.5rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.1rem;
 }
 
 .header p {
@@ -73,12 +97,12 @@ body {
 .tab-button {
     padding: 1rem 2rem;
     background: white;
-    border: 2px solid var(--azul-claro);
+    border: 2px solid var(--teal-claro);
     border-radius: 12px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--azul-oscuro);
+    color: var(--teal-oscuro);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
@@ -86,15 +110,15 @@ body {
 }
 
 .tab-button:hover {
-    background: var(--azul-claro);
+    background: var(--teal-muy-claro);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px var(--sombra);
 }
 
 .tab-button.active {
-    background: var(--azul-primario);
+    background: var(--teal-primario);
     color: white;
-    border-color: var(--azul-primario);
+    border-color: var(--teal-primario);
 }
 
 /* Contenido de tabs */
@@ -125,15 +149,16 @@ body {
 
 /* Tarjetas */
 .card {
-    background: var(--gris-muy-claro);
+    background: white;
     padding: 1.5rem;
     border-radius: 12px;
     margin-bottom: 1.5rem;
-    border-left: 4px solid var(--verde-primario);
+    border-left: 4px solid var(--teal-primario);
+    box-shadow: 0 2px 4px var(--sombra);
 }
 
 .card h3 {
-    color: var(--verde-primario);
+    color: var(--teal-primario);
     margin-bottom: 1rem;
 }
 
@@ -146,14 +171,14 @@ body {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: var(--azul-oscuro);
+    color: var(--teal-oscuro);
 }
 
 .form-group input,
 .form-group select {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid var(--azul-claro);
+    border: 2px solid var(--teal-claro);
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
@@ -162,7 +187,7 @@ body {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--azul-primario);
+    border-color: var(--teal-primario);
 }
 
 /* Botones */
@@ -180,14 +205,14 @@ body {
 }
 
 .btn-primary {
-    background: var(--verde-primario);
+    background: var(--teal-primario);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--verde-oscuro);
+    background: var(--teal-oscuro);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--sombra);
+    box-shadow: 0 4px 8px var(--sombra-hover);
 }
 
 .btn-secondary {
