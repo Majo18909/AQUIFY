@@ -291,10 +291,33 @@ function limpiarPerfilLocal() {
     }
 }
 
+function limpiarCancionesLocales() {
+    if (confirm('¿Estás seguro de borrar todas las canciones de este dispositivo? Solo se borrarán de este navegador.')) {
+        localStorage.removeItem('aquify_canciones');
+        playlist = [];
+        mostrarCanciones();
+        showAlert('Canciones eliminadas del dispositivo', 'success');
+        const infoElement = document.getElementById('canciones-local-info');
+        if (infoElement) {
+            infoElement.style.display = 'none';
+        }
+    }
+}
+
 // ============ GESTIÓN DE MÚSICA ============
 
 async function cargarCanciones() {
     try {
+        // Primero intentar cargar desde localStorage
+        const cancionesLocales = localStorage.getItem('aquify_canciones');
+
+        if (cancionesLocales) {
+            playlist = JSON.parse(cancionesLocales);
+            console.log('✓ Canciones cargadas desde dispositivo');
+            mostrarCanciones();
+        }
+
+        // Luego intentar sincronizar con el servidor
         const response = await fetch('/api/canciones', {
             credentials: 'include'
         });
@@ -302,19 +325,35 @@ async function cargarCanciones() {
 
         if (data.success) {
             playlist = data.canciones;
+            // Guardar en localStorage
+            localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
             mostrarCanciones();
         }
     } catch (error) {
         console.error('Error al cargar canciones:', error);
+        // Si ya teníamos canciones locales, seguimos con esas
+        if (playlist.length > 0) {
+            console.log('✓ Usando canciones guardadas localmente (modo offline)');
+            mostrarCanciones();
+        }
     }
 }
 
 function mostrarCanciones() {
     const list = document.getElementById('song-list');
+    const infoElement = document.getElementById('canciones-local-info');
 
     if (playlist.length === 0) {
         list.innerHTML = '<li style="text-align: center; padding: 2rem; color: #666;">No hay canciones. ¡Sube tu primera canción!</li>';
+        if (infoElement) {
+            infoElement.style.display = 'none';
+        }
         return;
+    }
+
+    // Mostrar mensaje de que hay canciones guardadas
+    if (infoElement) {
+        infoElement.style.display = 'block';
     }
 
     list.innerHTML = playlist.map(song => `
@@ -397,6 +436,8 @@ async function subirCancion() {
             showAlert('✓ Canción agregada exitosamente', 'success');
             fileInput.value = '';
             await cargarCanciones();
+            // Guardar en localStorage también
+            localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
         } else {
             showAlert(data.message || 'Error al subir canción', 'error');
         }
@@ -424,6 +465,8 @@ async function eliminarCancion(id) {
         if (data.success) {
             showAlert('✓ Canción eliminada', 'success');
             await cargarCanciones();
+            // Actualizar localStorage
+            localStorage.setItem('aquify_canciones', JSON.stringify(playlist));
         } else {
             showAlert('Error al eliminar canción', 'error');
         }

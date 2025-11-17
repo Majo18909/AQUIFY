@@ -108,11 +108,13 @@
             <div class="card" id="vercel-warning"
                 style="display: none; background: #fff3cd; border-left: 4px solid #ffc107;">
                 <h3 style="color: #856404;">⚠️ Limitación en Vercel</h3>
-                <p style="color: #856404;">La subida de archivos de música está deshabilitada en la versión de Vercel
-                    debido a limitaciones de almacenamiento temporal. Para usar esta función:</p>
+                <p style="color: #856404;"><strong>Archivos máximo 4MB en Vercel</strong> (límite del plan gratuito). El
+                    almacenamiento también es temporal.</p>
                 <ul style="color: #856404;">
-                    <li>Ejecuta la app localmente (localhost)</li>
-                    <li>O despliega en Render.com con almacenamiento persistente</li>
+                    <li><strong>Para archivos más grandes o permanentes:</strong></li>
+                    <li>✅ Ejecuta la app localmente (localhost) - hasta 50MB</li>
+                    <li>✅ Despliega en Render.com - almacenamiento persistente</li>
+                    <li>⚡ En Vercel: usa solo archivos pequeños (menos de 4MB) para demostración</li>
                 </ul>
             </div>
 
@@ -128,8 +130,16 @@
             </div>
 
             <div class="card">
-                <h3>Tu Playlist</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Tu Playlist</h3>
+                    <button class="btn"
+                        style="background: #dc3545; color: white; font-size: 0.85rem; padding: 0.4rem 0.8rem;"
+                        onclick="limpiarCancionesLocales()">🗑️ Limpiar del Dispositivo</button>
+                </div>
                 <ul id="song-list" class="song-list"></ul>
+                <p id="canciones-local-info"
+                    style="color: #666; font-size: 0.85rem; margin-top: 0.5rem; display: none;">
+                    💾 Tus canciones están guardadas en este dispositivo</p>
             </div>
         </div>
 
