@@ -99,6 +99,9 @@ function switchTab(tabName) {
         cargarCanciones();
     } else if (tabName === 'reproductor') {
         cargarCancionesEnSelector();
+    } else if (tabName === 'temporizador') {
+        // Actualizar tiempo del temporizador según perfil
+        actualizarTiempoRutina();
     }
 }
 
@@ -219,6 +222,74 @@ function mostrarPerfilDisplay() {
     info.innerHTML = html;
     display.style.display = 'block';
     form.style.display = 'none';
+
+    // Actualizar temporizador con tiempo de rutina personalizado
+    actualizarTiempoRutina();
+}
+
+function calcularTiempoRutina(usuario) {
+    // Calcula el tiempo de rutina personalizado según perfil
+    if (!usuario) return 7;
+
+    const tipo_piel = usuario.tipo_piel || 'Normal';
+    const edad = parseInt(usuario.edad) || 25;
+    const genero = usuario.genero || 'Prefiero no decirlo';
+
+    // Tiempo base según tipo de piel
+    const tiemposBase = {
+        'Normal': 7,
+        'Seca': 9,
+        'Mixta': 8,
+        'Grasa': 7,
+        'Sensible': 8,
+        'No sé': 7
+    };
+
+    let tiempo_base = tiemposBase[tipo_piel] || 7;
+
+    // Ajuste por edad
+    let ajuste_edad = 0;
+    if (edad < 18) {
+        ajuste_edad = -1;
+    } else if (edad >= 30 && edad < 50) {
+        ajuste_edad = 1;
+    } else if (edad >= 50) {
+        ajuste_edad = 2;
+    }
+
+    // Ajuste por género
+    let ajuste_genero = 0;
+    if (genero === 'Mujer') {
+        ajuste_genero = 2;
+    } else if (genero === 'Hombre') {
+        ajuste_genero = -1;
+    }
+
+    // Ajuste adicional por tipo de piel
+    let ajuste_piel_extra = 0;
+    if (tipo_piel === 'Seca' || tipo_piel === 'Sensible') {
+        ajuste_piel_extra = 1;
+    }
+
+    // Calcular tiempo total
+    let tiempo_total = tiempo_base + ajuste_edad + ajuste_genero + ajuste_piel_extra;
+
+    // Limitar entre 5 y 15 minutos
+    tiempo_total = Math.max(5, Math.min(15, tiempo_total));
+
+    return tiempo_total;
+}
+
+function actualizarTiempoRutina() {
+    // Actualiza el input del temporizador con el tiempo personalizado
+    if (currentUser) {
+        const tiempoRutina = calcularTiempoRutina(currentUser);
+        const timerInput = document.getElementById('timer-minutes');
+        if (timerInput) {
+            timerInput.value = tiempoRutina;
+            console.log(`✓ Temporizador actualizado a ${tiempoRutina} minutos según perfil`);
+        }
+    }
 }
 
 function mostrarPerfilForm() {
