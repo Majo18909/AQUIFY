@@ -73,12 +73,13 @@ body {
     font-weight: 900;
     margin: 0;
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-    letter-spacing: 0.5rem;
-    font-family: 'Arial Black', 'Arial', sans-serif;
+    letter-spacing: 0.3rem;
+    font-family: 'Fredoka One', 'Baloo 2', 'Righteous', 'Comic Sans MS', cursive, sans-serif;
     background: linear-gradient(180deg, #FFFFFF 0%, #E0F2F7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-transform: uppercase;
 }
 
 .logo-wave {
