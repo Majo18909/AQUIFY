@@ -205,6 +205,54 @@ RUTINAS_PIEL = {
     }
 }
 
+def calcular_tiempo_rutina_personalizado(usuario):
+    """Calcula el tiempo de rutina personalizado según perfil del usuario"""
+    if not usuario:
+        return 7  # Tiempo por defecto
+    
+    tipo_piel = usuario.get('tipo_piel', 'Normal')
+    edad = usuario.get('edad', 25)
+    genero = usuario.get('genero', 'Prefiero no decirlo')
+    
+    # Tiempo base según tipo de piel
+    tiempo_base = RUTINAS_PIEL.get(tipo_piel, RUTINAS_PIEL['Normal'])['tiempo_total']
+    
+    # Ajuste por edad
+    ajuste_edad = 0
+    if edad < 18:
+        ajuste_edad = -1  # Rutina más rápida para jóvenes
+    elif edad >= 18 and edad < 30:
+        ajuste_edad = 0  # Tiempo estándar
+    elif edad >= 30 and edad < 50:
+        ajuste_edad = 1  # +1 minuto para cuidado anti-edad
+    elif edad >= 50:
+        ajuste_edad = 2  # +2 minutos para cuidado intensivo
+    
+    # Ajuste por género (basado en rutinas de cuidado típicas)
+    ajuste_genero = 0
+    if genero == 'Mujer':
+        ajuste_genero = 2  # Rutina más completa típicamente
+    elif genero == 'Hombre':
+        ajuste_genero = -1  # Rutina más directa típicamente
+    # Personalizado y "Prefiero no decirlo" mantienen tiempo base
+    
+    # Ajuste adicional por tipo de piel
+    ajuste_piel_extra = 0
+    if tipo_piel == 'Seca':
+        ajuste_piel_extra = 1  # Más tiempo para hidratar
+    elif tipo_piel == 'Sensible':
+        ajuste_piel_extra = 1  # Más tiempo para enjuagar bien
+    elif tipo_piel == 'Grasa':
+        ajuste_piel_extra = 0  # Ya incluido en tiempo base
+    
+    # Calcular tiempo total
+    tiempo_total = tiempo_base + ajuste_edad + ajuste_genero + ajuste_piel_extra
+    
+    # Asegurar que el tiempo esté en un rango razonable (5-15 minutos)
+    tiempo_total = max(5, min(15, tiempo_total))
+    
+    return tiempo_total
+
 # ============ RUTAS WEB ============
 
 @app.route('/')
@@ -382,7 +430,19 @@ def obtener_rutina():
         return jsonify({'success': False, 'message': 'Debes crear un perfil primero'})
     
     tipo_piel = usuario.get('tipo_piel', 'Normal')
-    rutina = RUTINAS_PIEL.get(tipo_piel, RUTINAS_PIEL['Normal'])
+    rutina = RUTINAS_PIEL.get(tipo_piel, RUTINAS_PIEL['Normal']).copy()
+    
+    # Calcular tiempo personalizado
+    tiempo_personalizado = calcular_tiempo_rutina_personalizado(usuario)
+    rutina['tiempo_total'] = tiempo_personalizado
+    rutina['tiempo_base'] = RUTINAS_PIEL.get(tipo_piel, RUTINAS_PIEL['Normal'])['tiempo_total']
+    
+    # Agregar información del perfil
+    rutina['perfil'] = {
+        'genero': usuario.get('genero'),
+        'edad': usuario.get('edad'),
+        'tipo_piel': tipo_piel
+    }
     
     return jsonify({'success': True, 'rutina': rutina, 'tipo_piel': tipo_piel})
 
@@ -941,21 +1001,43 @@ def procesar_mensaje_chatbot():
             respuesta = 'Primero necesitas crear tu perfil en la pestaña "Perfil" para que pueda darte una rutina personalizada. 😊'
         else:
             tipo_piel = usuario.get('tipo_piel', 'Normal')
+            edad = usuario.get('edad', 25)
+            genero = usuario.get('genero', 'Prefiero no decirlo')
+            
             rutina_info = RUTINAS_PIEL.get(tipo_piel, RUTINAS_PIEL['Normal'])
+            tiempo_personalizado = calcular_tiempo_rutina_personalizado(usuario)
             
             respuesta = f'''Tu rutina personalizada para piel **{tipo_piel}**: 💧
+
+**📋 Perfil:**
+• Género: {genero}
+• Edad: {edad} años
+• Tipo de piel: {tipo_piel}
 
 **Pasos:**
 '''
             for i, paso in enumerate(rutina_info['rutina'], 1):
                 respuesta += f'{i}. {paso}\n'
             
-            respuesta += f'\n⏱️ **Tiempo total:** {rutina_info["tiempo_total"]} minutos\n\n'
-            respuesta += '**💡 Consejos:**\n'
+            respuesta += f'\n⏱️ **Tiempo total personalizado:** {tiempo_personalizado} minutos\n'
+            if tiempo_personalizado != rutina_info["tiempo_total"]:
+                respuesta += f'   _(Tiempo base para piel {tipo_piel}: {rutina_info["tiempo_total"]} min, ajustado según tu perfil)_\n'
+            
+            respuesta += '\n**💡 Consejos:**\n'
             for consejo in rutina_info['consejos']:
                 respuesta += f'• {consejo}\n'
             
+            # Agregar consejos específicos según el perfil
+            if edad >= 30:
+                respuesta += '\n**✨ Extra para tu edad:**\n'
+                if edad >= 30 and edad < 50:
+                    respuesta += '• Considera usar productos con antioxidantes y retinol\n'
+                elif edad >= 50:
+                    respuesta += '• Usa productos anti-edad con péptidos y ácido hialurónico\n'
+                    respuesta += '• Hidrata más intensamente por la noche\n'
+            
             datos_extra['rutina'] = rutina_info
+            datos_extra['tiempo_personalizado'] = tiempo_personalizado
     
     elif intencion == 'editar_rutina':
         respuesta = '''Para editar tu rutina puedo ayudarte con: 🛠️
