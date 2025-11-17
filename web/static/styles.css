@@ -45,16 +45,16 @@ body {
 
 /* Header */
 .header {
-    background: #2B5F6F;
+    background: #335D6D;
     text-align: center;
     box-shadow: 0 4px 6px var(--sombra);
-    padding: 2rem 0;
+    padding: 1.5rem 0;
     overflow: hidden;
 }
 
 .header-logo {
     width: 100%;
-    max-width: 600px;
+    max-width: 300px;
     height: auto;
     display: block;
     margin: 0 auto;
@@ -63,7 +63,7 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .header-logo {
-        max-width: 90%;
+        max-width: 250px;
     }
 }
 
