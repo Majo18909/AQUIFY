@@ -7,19 +7,17 @@
     <title>AQUIFY - Tu Compañero Musical para el Baño</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@800&family=Righteous&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@800&family=Righteous&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <div class="logo-gota">💧</div>
-            <h1 class="logo-text">AQUIFY</h1>
-            <div class="logo-wave">〰️</div>
-        </div>
-        <p class="header-subtitle">SAVER</p>
+        <img src="{{ url_for('static', filename='img/aquify-header.png') }}" alt="AQUIFY Logo" class="header-logo" 
+             onerror="this.src='{{ url_for('static', filename='img/aquify-header.jpg') }}'">
     </header>
 
     <!-- Container Principal -->
