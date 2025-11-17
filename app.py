@@ -317,6 +317,23 @@ def obtener_canciones():
     """Obtiene la lista de canciones"""
     playlist_file = get_user_file('playlist.json')
     playlist = cargar_json(playlist_file, [])
+    
+    # Migrar IDs antiguos a timestamps si es necesario
+    necesita_migracion = False
+    import time
+    
+    for cancion in playlist:
+        # Si el ID es menor a 1000000000000 (timestamp de milisegundos), es un ID antiguo
+        if cancion.get('id', 0) < 1000000000000:
+            necesita_migracion = True
+            # Generar nuevo ID único basado en timestamp + un pequeño incremento
+            cancion['id'] = int(time.time() * 1000) + playlist.index(cancion)
+    
+    # Guardar si hubo migración
+    if necesita_migracion:
+        guardar_json(playlist_file, playlist)
+        print(f"✓ Migrados {len(playlist)} IDs de canciones a formato timestamp")
+    
     return jsonify({'success': True, 'canciones': playlist})
 
 @app.route('/api/canciones/subir', methods=['POST'])
@@ -398,19 +415,26 @@ def subir_cancion():
 def eliminar_cancion(id):
     """Elimina una canción"""
     try:
+        print(f"\n=== ELIMINANDO CANCIÓN ID: {id} ===")
         playlist_file = get_user_file('playlist.json')
         playlist = cargar_json(playlist_file, [])
+        
+        print(f"Playlist tiene {len(playlist)} canciones")
+        print(f"IDs en playlist: {[c.get('id') for c in playlist]}")
         
         cancion_encontrada = None
         indice_encontrado = -1
         
         for i, cancion in enumerate(playlist):
-            if cancion.get('id') == id:
+            cancion_id = cancion.get('id')
+            print(f"Comparando: {cancion_id} == {id} ? {cancion_id == id}")
+            if cancion_id == id:
                 cancion_encontrada = cancion
                 indice_encontrado = i
                 break
         
         if cancion_encontrada:
+            print(f"✓ Canción encontrada: {cancion_encontrada.get('nombre')}")
             # Eliminar de la lista
             playlist.pop(indice_encontrado)
             
@@ -425,8 +449,11 @@ def eliminar_cancion(id):
             
             # Guardar playlist actualizada
             guardar_json(playlist_file, playlist)
+            print("=== ELIMINACIÓN EXITOSA ===\n")
             return jsonify({'success': True, 'message': 'Canción eliminada exitosamente'})
         
+        print(f"✗ Canción con ID {id} no encontrada")
+        print("=== ELIMINACIÓN FALLIDA ===\n")
         return jsonify({'success': False, 'message': 'Canción no encontrada'})
     
     except Exception as e:
