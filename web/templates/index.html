@@ -16,8 +16,16 @@
 <body>
     <!-- Header -->
     <header class="header">
-        <img src="{{ url_for('static', filename='img/aquify-header.png') }}" alt="AQUIFY Logo" class="header-logo" 
-             onerror="this.src='{{ url_for('static', filename='img/aquify-header.jpg') }}'">
+        <div class="logo-wrapper">
+            <svg class="logo-gota-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 10 C30 40, 20 60, 20 80 C20 95, 33 110, 50 110 C67 110, 80 95, 80 80 C80 60, 70 40, 50 10 Z" fill="white"/>
+            </svg>
+            <h1 class="logo-text">AQUIFY</h1>
+            <svg class="logo-wave-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 50 Q50 20, 90 50 T170 50" stroke="white" stroke-width="8" fill="none" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <p class="logo-subtitle">SAVER</p>
     </header>
 
     <!-- Container Principal -->
