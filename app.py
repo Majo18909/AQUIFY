@@ -427,7 +427,6 @@ CONOCIMIENTO_BASE = {
 • Ver tu rutina de ducha personalizada según tu tipo de piel
 • Obtener consejos de cuidado de la piel
 • Recomendarte productos adecuados para tu perfil
-• Sugerirte rutinas de famosos y celebridades
 • Ayudarte a editar y personalizar tu rutina
 • Recomendar música perfecta para tu ducha
 • Buscar canciones de artistas específicos para tu rutina
@@ -445,7 +444,6 @@ CONOCIMIENTO_BASE = {
     }
 }
 
-# Rutinas de famosos/celebridades (basadas en rutinas reales compartidas públicamente)
 # Productos recomendados por tipo de piel# Productos recomendados por tipo de piel
 PRODUCTOS_RECOMENDADOS = {
     'Normal': {
@@ -701,7 +699,6 @@ Para encontrar canciones específicas de este artista, puedes:
 
 Puedo ayudarte con:
 • Tu rutina de ducha personalizada
-• Rutinas de famosos
 • Recomendaciones de productos
 • Sugerencias de música
 • Información sobre cuidado de la piel
