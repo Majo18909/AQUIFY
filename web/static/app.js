@@ -771,6 +771,12 @@ function cargarCancionesEnSelector() {
 
     selector.innerHTML = '<option value="">-- Selecciona una canción --</option>' +
         playlist.map(song => `<option value="${song.id}">${song.nombre}</option>`).join('');
+
+    // Actualizar el tiempo de rutina con el valor personalizado
+    if (currentUser) {
+        const tiempoPersonalizado = calcularTiempoRutina(currentUser);
+        document.getElementById('tiempo-rutina').value = tiempoPersonalizado;
+    }
 }
 
 function toggleTiempoRutina() {
@@ -780,17 +786,12 @@ function toggleTiempoRutina() {
     if (modo === 'rutina') {
         container.style.display = 'block';
 
-        // Cargar tiempo sugerido basado en tipo de piel
-        if (currentUser && currentUser.tipo_piel) {
-            const tiemposSugeridos = {
-                'Normal': 7,
-                'Seca': 9,
-                'Mixta': 8,
-                'Grasa': 7,
-                'Sensible': 8,
-                'No sé': 7
-            };
-            document.getElementById('tiempo-rutina').value = tiemposSugeridos[currentUser.tipo_piel] || 7;
+        // Cargar tiempo personalizado basado en el perfil completo
+        if (currentUser) {
+            const tiempoPersonalizado = calcularTiempoRutina(currentUser);
+            document.getElementById('tiempo-rutina').value = tiempoPersonalizado;
+        } else {
+            document.getElementById('tiempo-rutina').value = 7;
         }
     } else {
         container.style.display = 'none';
